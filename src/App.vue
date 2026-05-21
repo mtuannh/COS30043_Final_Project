@@ -1,14 +1,22 @@
 <script setup>
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 
 const store = inject('store');
+
+const savedTheme = localStorage.getItem('novatech-theme');
+const isDarkMode = ref(savedTheme === 'dark');
+
+function toggleDarkMode() {
+  isDarkMode.value = !isDarkMode.value;
+  localStorage.setItem('novatech-theme', isDarkMode.value ? 'dark' : 'light');
+}
 
 const cartCount = computed(() => store.cart.reduce((total, item) => total + item.quantity, 0));
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'dark-mode': isDarkMode }">
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
       <div class="container">
         <RouterLink class="navbar-brand fw-bold" to="/">NovaTech</RouterLink>
@@ -34,6 +42,9 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
           </ul>
 
           <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-dark rounded-pill" type="button" @click="toggleDarkMode">
+                {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
+            </button>
             <RouterLink class="btn btn-outline-dark rounded-pill" to="/cart">
               Bag <span class="badge text-bg-dark ms-1">{{ cartCount }}</span>
             </RouterLink>

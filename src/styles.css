@@ -15,6 +15,46 @@ body {
 
 .app-shell {
   min-height: 100vh;
+  background: #ffffff;
+  color: var(--ink);
+}
+
+.dark-mode .navbar,
+.dark-mode footer {
+  background: #18181b !important;
+  border-color: #2f2f35 !important;
+}
+
+.dark-mode .navbar-brand,
+.dark-mode .nav-link,
+.dark-mode .text-secondary {
+  color: var(--muted) !important;
+}
+
+.dark-mode .btn-outline-dark {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.dark-mode .btn-dark {
+  background: #f5f5f7;
+  border-color: #f5f5f7;
+  color: #111111;
+}
+
+.dark-mode .btn-light {
+  background: #2a2a30;
+  border-color: #2a2a30;
+  color: var(--ink);
+}
+
+.app-shell.dark-mode {
+  --ink: #f5f5f7;
+  --muted: #b6b6c0;
+  --surface: #1f1f23;
+
+  background: #111111;
+  color: var(--ink);
 }
 
 .navbar-brand {
