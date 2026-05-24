@@ -1,25 +1,55 @@
+import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
+import { MongoClient } from 'mongodb';
 import { randomUUID } from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, 'db.json');
-const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
-
-async function readDb() {
-  const contents = await readFile(dbPath, 'utf8');
-  return JSON.parse(contents);
+if (!process.env.MONGODB_URI) {
+  console.error('MONGODB_URI is not set in .env');
+  process.exit(1);
 }
 
-async function writeDb(db) {
-  await writeFile(dbPath, JSON.stringify(db, null, 2));
+const client = new MongoClient(process.env.MONGODB_URI);
+
+let users;
+let products;
+let messages;
+
+async function connectDatabase() {
+  await client.connect();
+  const db = client.db();
+  users = db.collection('users');
+  products = db.collection('products');
+  messages = db.collection('messages');
+  await seedIfEmpty();
+  console.log(`Connected to MongoDB database "${db.databaseName}"`);
+}
+
+async function seedIfEmpty() {
+  if ((await products.countDocuments()) > 0) {
+    return;
+  }
+
+  const seed = JSON.parse(await readFile(dbPath, 'utf8'));
+
+  if (seed.users?.length) {
+    await users.insertMany(seed.users);
+  }
+  if (seed.products?.length) {
+    await products.insertMany(seed.products);
+  }
+  if (seed.messages?.length) {
+    await messages.insertMany(seed.messages);
+  }
+
+  console.log('Seeded database from server/db.json');
 }
 
 function withoutPassword(user) {
@@ -27,39 +57,42 @@ function withoutPassword(user) {
   return safeUser;
 }
 
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
 app.get('/api/products', async (req, res) => {
-  const db = await readDb();
   const query = String(req.query.query || '').toLowerCase();
   const category = String(req.query.category || '');
   const sort = String(req.query.sort || 'featured');
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 6);
 
-  let products = [...db.products];
+  let items = await products.find().toArray();
 
   if (query) {
-    products = products.filter((product) =>
+    items = items.filter((product) =>
       [product.name, product.category, product.summary, product.description].join(' ').toLowerCase().includes(query)
     );
   }
 
   if (category) {
-    products = products.filter((product) => product.category === category);
+    items = items.filter((product) => product.category === category);
   }
 
-  if (sort === 'price-asc') products.sort((a, b) => a.price - b.price);
-  if (sort === 'price-desc') products.sort((a, b) => b.price - a.price);
-  if (sort === 'likes-desc') products.sort((a, b) => b.likes - a.likes);
+  if (sort === 'price-asc') items.sort((a, b) => a.price - b.price);
+  if (sort === 'price-desc') items.sort((a, b) => b.price - a.price);
+  if (sort === 'likes-desc') items.sort((a, b) => b.likes - a.likes);
 
-  const total = products.length;
+  const total = items.length;
   const start = (page - 1) * limit;
 
-  res.json({ items: products.slice(start, start + limit), total, page, limit });
+  res.json({ items: items.slice(start, start + limit), total, page, limit });
 });
 
 app.get('/api/products/:id', async (req, res) => {
-  const db = await readDb();
-  const product = db.products.find((item) => item.id === req.params.id);
+  const product = await products.findOne({ id: req.params.id });
 
   if (!product) {
     res.status(404).json({ message: 'Product not found' });
@@ -70,56 +103,62 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 app.post('/api/products', async (req, res) => {
-  const db = await readDb();
   const product = {
     id: randomUUID(),
     likes: 0,
     ...req.body
   };
 
-  db.products.unshift(product);
-  await writeDb(db);
+  await products.insertOne(product);
   res.status(201).json(product);
 });
 
 app.put('/api/products/:id', async (req, res) => {
-  const db = await readDb();
-  const index = db.products.findIndex((item) => item.id === req.params.id);
+  const result = await products.findOneAndUpdate(
+    { id: req.params.id },
+    { $set: req.body },
+    { returnDocument: 'after' }
+  );
 
-  if (index === -1) {
+  if (!result) {
     res.status(404).json({ message: 'Product not found' });
     return;
   }
 
-  db.products[index] = { ...db.products[index], ...req.body };
-  await writeDb(db);
-  res.json(db.products[index]);
+  res.json(result);
 });
 
 app.delete('/api/products/:id', async (req, res) => {
-  const db = await readDb();
-  db.products = db.products.filter((item) => item.id !== req.params.id);
-  await writeDb(db);
+  const result = await products.deleteOne({ id: req.params.id });
+
+  if (result.deletedCount === 0) {
+    res.status(404).json({ message: 'Product not found' });
+    return;
+  }
+
   res.json({ ok: true });
 });
 
 app.post('/api/products/:id/like', async (req, res) => {
-  const db = await readDb();
-  const product = db.products.find((item) => item.id === req.params.id);
+  const product = await products.findOneAndUpdate(
+    { id: req.params.id },
+    { $inc: { likes: 1 } },
+    { returnDocument: 'after' }
+  );
 
   if (!product) {
     res.status(404).json({ message: 'Product not found' });
     return;
   }
 
-  product.likes += 1;
-  await writeDb(db);
   res.json(product);
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const db = await readDb();
-  const user = db.users.find((item) => item.email === req.body.email && item.password === req.body.password);
+  const user = await users.findOne({
+    email: req.body.email,
+    password: req.body.password
+  });
 
   if (!user) {
     res.status(401).json({ message: 'Invalid email or password' });
@@ -130,9 +169,9 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/auth/register', async (req, res) => {
-  const db = await readDb();
+  const existing = await users.findOne({ email: req.body.email });
 
-  if (db.users.some((user) => user.email === req.body.email)) {
+  if (existing) {
     res.status(409).json({ message: 'Email is already registered' });
     return;
   }
@@ -142,24 +181,36 @@ app.post('/api/auth/register', async (req, res) => {
     role: 'customer',
     ...req.body
   };
-  db.users.push(user);
-  await writeDb(db);
+
+  await users.insertOne(user);
   res.status(201).json(withoutPassword(user));
 });
 
 app.post('/api/messages', async (req, res) => {
-  const db = await readDb();
   const message = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
     ...req.body
   };
 
-  db.messages.push(message);
-  await writeDb(db);
+  await messages.insertOne(message);
   res.status(201).json(message);
 });
 
-app.listen(port, () => {
-  console.log(`NovaTech API running at http://localhost:${port}/api`);
+async function start() {
+  await connectDatabase();
+
+  app.listen(port, () => {
+    console.log(`NovaTech API running at http://localhost:${port}/api`);
+  });
+}
+
+start().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
+
+process.on('SIGINT', async () => {
+  await client.close();
+  process.exit(0);
 });
