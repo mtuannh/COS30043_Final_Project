@@ -272,8 +272,8 @@ async function handleQuickReply(reply) {
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <button v-if="phase === 'chat'" class="chat-new-btn" @click="newConversation" title="Start new conversation" aria-label="New conversation">↺</button>
-          <button class="chat-close-btn" @click="closeChat" aria-label="Close chat">✕</button>
+          <button v-if="phase === 'chat'" class="chat-new-btn" @click="newConversation" title="Start new conversation" aria-label="New conversation"><img src="/re.png" alt="Refresh" class="re-button-img" /></button>
+          <button class="chat-close-btn" @click="closeChat" aria-label="Close chat"><img src="/close.png" alt="Close" class="close-button-img" /></button>
         </div>
       </div>
 
@@ -288,7 +288,6 @@ async function handleQuickReply(reply) {
           >
             <div v-if="msg.type !== 'user'" class="msg-avatar">
               <img v-if="msg.type === 'bot'" src="/chatbot.png" alt="Bot" class="chat-avatar-img" />
-              <span v-else>👤</span>
             </div>
             <div class="msg-content">
               <div v-if="msg.type === 'admin'" class="msg-sender-label">Admin</div>
@@ -340,7 +339,7 @@ async function handleQuickReply(reply) {
             @keydown="onInputKeydown"
           ></textarea>
           <button class="chat-send-btn" :disabled="!inputText.trim() || isTyping" @click="sendMessage" aria-label="Send message">
-            ➤
+            <img src="/sentarrow.png" alt="Arrow" class="sent-arrow-img" />
           </button>
         </div>
 
