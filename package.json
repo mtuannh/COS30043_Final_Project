@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "api": "node server/server.js",
-    "start": "concurrently \"npm run api\" \"npm run dev\"",
+    "start": "concurrently -k \"npm run api\" \"wait-on -t 30000 http://localhost:3001/api/products && npm run dev\"",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0"
   },
@@ -18,8 +18,12 @@
     "dotenv": "^17.4.2",
     "express": "latest",
     "mongodb": "^7.2.0",
+    "nodemailer": "^8.0.8",
     "vite": "latest",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "wait-on": "^9.0.10"
   }
 }
