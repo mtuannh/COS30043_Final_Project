@@ -8,6 +8,7 @@ import RegisterView from '../views/RegisterView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import AdminView from '../views/AdminView.vue';
 import ProductFormView from '../views/ProductFormView.vue';
+import AdminInboxView from '../views/AdminInboxView.vue';
 import AboutView from '../views/AboutView.vue';
 import ContactView from '../views/ContactView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
@@ -20,9 +21,10 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView },
   { path: '/register', name: 'register', component: RegisterView },
   { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
-  { path: '/admin', name: 'admin', component: AdminView, meta: { requiresAuth: true } },
-  { path: '/admin/products/new', name: 'product-new', component: ProductFormView, meta: { requiresAuth: true } },
-  { path: '/admin/products/:id/edit', name: 'product-edit', component: ProductFormView, meta: { requiresAuth: true }, props: true },
+  { path: '/admin', name: 'admin', component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/admin/inbox', name: 'admin-inbox', component: AdminInboxView, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/admin/products/new', name: 'product-new', component: ProductFormView, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/admin/products/:id/edit', name: 'product-edit', component: ProductFormView, meta: { requiresAuth: true, requiresAdmin: true }, props: true },
   { path: '/about', name: 'about', component: AboutView },
   { path: '/contact', name: 'contact', component: ContactView },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView }
@@ -41,6 +43,10 @@ router.beforeEach((to) => {
 
   if (to.meta.requiresAuth && !user) {
     return { name: 'login', query: { redirect: to.fullPath } };
+  }
+
+  if (to.meta.requiresAdmin && user?.role !== 'admin') {
+    return { name: 'home' };
   }
 
   return true;

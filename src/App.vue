@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, ref } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
+import ChatWidget from './components/ChatWidget.vue';
 
 const store = inject('store');
 
@@ -37,7 +38,8 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
             <li class="nav-item"><RouterLink class="nav-link" to="/products">Products</RouterLink></li>
             <li class="nav-item"><RouterLink class="nav-link" to="/about">About</RouterLink></li>
             <li class="nav-item"><RouterLink class="nav-link" to="/contact">Contact</RouterLink></li>
-            <li v-if="store.user" class="nav-item"><RouterLink class="nav-link" to="/admin">Manage</RouterLink></li>
+            <li v-if="store.user?.role === 'admin'" class="nav-item"><RouterLink class="nav-link" to="/admin">Manage</RouterLink></li>
+            <li v-if="store.user?.role === 'admin'" class="nav-item"><RouterLink class="nav-link" to="/admin/inbox">Inbox</RouterLink></li>
           </ul>
 
           <div class="d-flex align-items-center gap-2">
@@ -64,5 +66,7 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
         <span>Responsive ecommerce prototype with REST API persistence.</span>
       </div>
     </footer>
+
+    <ChatWidget />
   </div>
 </template>
