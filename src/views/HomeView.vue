@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import DiscountWheel from '../components/DiscountWheel.vue';
 import ProductCard from '../components/ProductCard.vue';
 import { api } from '../services/api';
 
@@ -42,5 +43,7 @@ onMounted(async () => {
       </div>
     </div>
   </section>
+
+  <DiscountWheel />
 
 </template>
