@@ -43,26 +43,4 @@ onMounted(async () => {
     </div>
   </section>
 
-  <section class="container">
-    <div class="row g-4">
-      <div class="col-12 col-lg-4">
-        <div class="feature-panel h-100">
-          <h3>10+ Pages</h3>
-          <p>Home, catalogue, details, cart, auth, profile, admin, edit, about, contact, and error routes.</p>
-        </div>
-      </div>
-      <div class="col-12 col-lg-4">
-        <div class="feature-panel h-100">
-          <h3>Reactive Vue</h3>
-          <p>Uses Vue directives, forms, computed state, events, route guards, and component-based UI.</p>
-        </div>
-      </div>
-      <div class="col-12 col-lg-4">
-        <div class="feature-panel h-100">
-          <h3>REST Persistence</h3>
-          <p>A small Express API stores products, users, likes, and messages in a JSON database.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 </template>
