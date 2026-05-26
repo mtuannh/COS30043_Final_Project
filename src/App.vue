@@ -35,7 +35,6 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
         <div id="mainNavigation" class="collapse navbar-collapse">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item"><RouterLink class="nav-link" to="/products">Products</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link" to="/search">Search</RouterLink></li>
             <li class="nav-item"><RouterLink class="nav-link" to="/about">About</RouterLink></li>
             <li class="nav-item"><RouterLink class="nav-link" to="/contact">Contact</RouterLink></li>
             <li v-if="store.user" class="nav-item"><RouterLink class="nav-link" to="/admin">Manage</RouterLink></li>

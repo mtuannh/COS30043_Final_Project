@@ -20,7 +20,7 @@ Demo admin account:
 
 - Vue 3 with Vite: implemented in `src/main.js` and `vite.config.js`.
 - Bootstrap grid and responsive design: Bootstrap is imported globally and used throughout all views.
-- 10+ interconnected pages: home, products, product detail, search, cart, login, register, profile, admin, create/edit product, about, contact, and not found.
+- 10+ interconnected pages: home, products, product detail, cart, login, register, profile, admin, create/edit product, about, contact, and not found.
 - Collection display and detail pages: products list and product detail routes.
 - Search, sort, and pagination: catalogue filters in `ProductsView.vue`.
 - Registration and login: auth endpoints and guarded profile/admin routes.

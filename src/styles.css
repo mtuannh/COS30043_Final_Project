@@ -68,6 +68,12 @@ body {
     linear-gradient(180deg, #fbfbfd, #ffffff);
 }
 
+.dark-mode .hero-section {
+  background:
+    radial-gradient(circle at top left, rgba(0, 122, 255, 0.18), transparent 32rem),
+    linear-gradient(180deg, #18181b, #111111);
+}
+
 .hero-copy {
   max-width: 720px;
 }
@@ -139,6 +145,19 @@ body {
   display: flex;
   gap: 1rem;
   padding: 1.25rem 0;
+}
+
+.dark-mode .contact-form .form-control {
+  background: #111111;
+  border: 1px solid #f5f5f7;
+  color: var(--ink);
+}
+
+.dark-mode .contact-form .form-control:focus {
+  background: #111111;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 0.25rem rgba(245, 245, 247, 0.16);
+  color: var(--ink);
 }
 
 .cart-thumb {

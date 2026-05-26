@@ -34,7 +34,7 @@ async function submit() {
       <div class="col-12 col-lg-7">
         <p v-if="status" class="alert alert-success">{{ status }}</p>
         <p v-if="error" class="alert alert-danger">{{ error }}</p>
-        <form class="d-grid gap-3" @submit.prevent="submit">
+        <form class="contact-form d-grid gap-3" @submit.prevent="submit">
           <div>
             <label class="form-label" for="name">Name</label>
             <input id="name" v-model.trim="form.name" class="form-control" required />

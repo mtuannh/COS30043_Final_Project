@@ -33,7 +33,7 @@ onMounted(async () => {
         <p class="eyebrow">Popular now</p>
         <h2 class="h1">Loved by the community</h2>
       </div>
-      <RouterLink class="link-dark" to="/search">Advanced search</RouterLink>
+      <RouterLink class="link-dark" to="/products">Browse products</RouterLink>
     </div>
 
     <div class="row g-4">
@@ -48,7 +48,7 @@ onMounted(async () => {
       <div class="col-12 col-lg-4">
         <div class="feature-panel h-100">
           <h3>10+ Pages</h3>
-          <p>Home, catalogue, details, search, cart, auth, profile, admin, edit, about, contact, and error routes.</p>
+          <p>Home, catalogue, details, cart, auth, profile, admin, edit, about, contact, and error routes.</p>
         </div>
       </div>
       <div class="col-12 col-lg-4">
