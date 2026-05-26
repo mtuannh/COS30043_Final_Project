@@ -33,7 +33,7 @@ onMounted(loadProducts);
 
     <p v-if="message" class="alert alert-success">{{ message }}</p>
 
-    <div class="table-responsive rounded-4 border">
+    <div class="admin-table table-responsive rounded-4 border">
       <table class="table align-middle mb-0">
         <thead class="table-light">
           <tr>

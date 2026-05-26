@@ -14,9 +14,15 @@ body {
 }
 
 .app-shell {
-  min-height: 100vh;
   background: #ffffff;
   color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-shell main {
+  flex: 1;
 }
 
 .dark-mode .navbar,
@@ -102,6 +108,40 @@ body {
   overflow: hidden;
 }
 
+.dark-mode .product-filters {
+  background: #1f1f23 !important;
+  border: 1px solid #2f2f35;
+}
+
+.dark-mode .product-filters .form-control,
+.dark-mode .product-filters .form-select {
+  background-color: #111111;
+  border: 1px solid #f5f5f7;
+  color: var(--ink);
+}
+
+.dark-mode .product-filters .form-control::placeholder {
+  color: var(--muted);
+}
+
+.dark-mode .product-filters .form-control:focus,
+.dark-mode .product-filters .form-select:focus {
+  background-color: #111111;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 0.25rem rgba(245, 245, 247, 0.16);
+  color: var(--ink);
+}
+
+.dark-mode .product-card {
+  background: #1f1f23;
+  border: 1px solid #2f2f35 !important;
+  color: var(--ink);
+}
+
+.dark-mode .product-card .card-body {
+  background: #1f1f23;
+}
+
 .product-image,
 .detail-visual,
 .cart-thumb {
@@ -160,6 +200,34 @@ body {
   color: var(--ink);
 }
 
+.dark-mode .admin-table {
+  border-color: #2f2f35 !important;
+}
+
+.dark-mode .admin-table .table {
+  --bs-table-bg: #1f1f23;
+  --bs-table-border-color: #2f2f35;
+  --bs-table-color: var(--ink);
+  --bs-table-striped-color: var(--ink);
+  --bs-table-hover-color: var(--ink);
+}
+
+.dark-mode .admin-table .table-light {
+  --bs-table-bg: #111111;
+  --bs-table-color: var(--ink);
+  --bs-table-border-color: #2f2f35;
+}
+
+.dark-mode .admin-table .btn-outline-dark {
+  border-color: #f5f5f7;
+  color: var(--ink);
+}
+
+.dark-mode .admin-table .btn-outline-danger {
+  border-color: #ff8fa3;
+  color: #ffb3c1;
+}
+
 .cart-thumb {
   border-radius: 20px;
   flex: 0 0 110px;
@@ -174,6 +242,12 @@ body {
   background: #ffffff;
   border-radius: 22px;
   padding: 1.5rem;
+}
+
+.dark-mode .metric-card {
+  background: #111111;
+  border: 1px solid #2f2f35;
+  color: var(--ink);
 }
 
 .metric-card span {
@@ -191,9 +265,27 @@ body {
   color: var(--ink);
 }
 
+.dark-mode .page-link {
+  background: #1f1f23;
+  border-color: #2f2f35;
+  color: var(--ink);
+}
+
+.dark-mode .page-item.disabled .page-link {
+  background: #18181b;
+  border-color: #2f2f35;
+  color: var(--muted);
+}
+
 .active > .page-link {
   background: var(--ink);
   border-color: var(--ink);
+}
+
+.dark-mode .active > .page-link {
+  background: #f5f5f7;
+  border-color: #f5f5f7;
+  color: #111111;
 }
 
 @media (max-width: 767.98px) {

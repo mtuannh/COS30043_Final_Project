@@ -6,14 +6,14 @@ defineProps({
   }
 });
 
-const filters = defineModel({
+let filters = defineModel({
   type: Object,
   required: true
 });
 </script>
 
 <template>
-  <form class="row g-3 align-items-end p-3 bg-light rounded-4" @submit.prevent>
+  <form class="product-filters row g-3 align-items-end p-3 bg-light rounded-4" @submit.prevent>
     <div class="col-12 col-md-5">
       <label class="form-label" for="query">Search products</label>
       <input id="query" v-model.trim="filters.query" class="form-control" type="search" placeholder="iPhone, iPad, Mac..." />

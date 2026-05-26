@@ -8,7 +8,7 @@ const products = ref([]);
 const total = ref(0);
 const currentPage = ref(1);
 const loading = ref(false);
-const filters = reactive({
+let filters = reactive({
   query: '',
   category: '',
   sort: 'featured',
