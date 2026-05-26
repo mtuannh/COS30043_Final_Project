@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -10,8 +10,11 @@ async function request(path, options = {}) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || 'Request failed');
+    const error = await response.json().catch(() => ({}));
+    if (response.status === 404) {
+      throw new Error('API route not found. Restart the backend with `npm run api` or `npm run start`.');
+    }
+    throw new Error(error.message || `Request failed (${response.status})`);
   }
 
   return response.json();
@@ -59,6 +62,17 @@ export const api = {
     return request('/messages', {
       method: 'POST',
       body: JSON.stringify(message)
+    });
+  },
+  spinDiscount() {
+    return request('/discounts/spin', {
+      method: 'POST'
+    });
+  },
+  claimDiscount(payload) {
+    return request('/discounts/claim', {
+      method: 'POST',
+      body: JSON.stringify(payload)
     });
   }
 };
