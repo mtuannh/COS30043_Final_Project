@@ -257,6 +257,9 @@ async function handleQuickReply(reply) {
     Need Help?
   </button>
 
+  <!-- Backdrop: click outside to close -->
+  <div v-if="isOpen" class="chat-backdrop" @click="closeChat" />
+
   <!-- Chat Window -->
   <Transition name="chat-slide">
     <div v-if="isOpen" class="chat-window" role="dialog" aria-label="NovaTech Support Chat">
@@ -376,19 +379,29 @@ async function handleQuickReply(reply) {
 </template>
 
 <style scoped>
+.chat-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1031;
+  background: transparent;
+  cursor: default;
+}
+
+
+/* ── Mobile-first base: small phones (< 480px) ── */
 .chat-widget-btn {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 14px;
+  right: 14px;
   background: #111111;
   color: #ffffff;
   border: none;
-  padding: 14px 22px;
+  padding: 11px 16px;
   border-radius: 50px;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  z-index: 1000;
-  font-size: 0.9rem;
+  z-index: 1033;
+  font-size: 0.82rem;
   font-weight: 600;
   font-family: inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -401,18 +414,56 @@ async function handleQuickReply(reply) {
 
 .chat-window {
   position: fixed;
-  bottom: 88px;
-  right: 24px;
-  width: 360px;
-  height: 600px;
-  max-height: 85vh;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  max-height: 100dvh;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
-  z-index: 1001;
+  z-index: 1032;
   overflow: hidden;
+}
+
+/* ── Tablet: large phones / tablets (≥ 480px) ── */
+@media (min-width: 480px) {
+  .chat-widget-btn {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 19px;
+    font-size: 0.87rem;
+  }
+
+  .chat-window {
+    bottom: 0;
+    right: 16px;
+    width: min(92%, 400px);
+    height: 72dvh;
+    max-height: 560px;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* ── Desktop (≥ 768px) ── */
+@media (min-width: 768px) {
+  .chat-widget-btn {
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 22px;
+    font-size: 0.9rem;
+  }
+
+  .chat-window {
+    bottom: 88px;
+    right: 24px;
+    width: 360px;
+    height: 600px;
+    max-height: 85vh;
+    border-radius: 16px;
+  }
 }
 
 .chat-header {
@@ -780,19 +831,4 @@ async function handleQuickReply(reply) {
   opacity: 0;
 }
 
-@media (max-width: 767px) {
-  .chat-window {
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    max-height: 100dvh;
-    border-radius: 0;
-  }
-
-  .chat-widget-btn {
-    bottom: 16px;
-    right: 16px;
-  }
-}
 </style>
