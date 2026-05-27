@@ -129,6 +129,6 @@ onMounted(async () => {
     </section>
   </template>
 
-  <DiscountWheel />
+  <DiscountWheel v-if="!isAdmin" />
 
 </template>

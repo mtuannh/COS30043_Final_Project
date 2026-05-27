@@ -14,6 +14,7 @@ function toggleDarkMode() {
 }
 
 const cartCount = computed(() => store.cart.reduce((total, item) => total + item.quantity, 0));
+const isAdmin = computed(() => store.user?.role === 'admin');
 </script>
 
 <template>
@@ -69,6 +70,6 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
       </div>
     </footer>
 
-    <ChatWidget />
+    <ChatWidget v-if="!isAdmin" />
   </div>
 </template>
