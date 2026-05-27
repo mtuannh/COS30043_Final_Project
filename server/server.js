@@ -1,5 +1,6 @@
-import 'dotenv/config';
+import bcrypt from 'bcryptjs';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { MongoClient } from 'mongodb';

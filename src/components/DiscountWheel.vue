@@ -272,7 +272,19 @@ async function submitEmail() {
 <style scoped>
 .promo-panel {
   border-radius: 1.5rem;
-  background: #f8f9fa;
+  background: var(--surface);
+  border: 1px solid rgba(110, 110, 115, 0.18);
+  color: var(--ink);
+}
+
+:global(.app-shell.dark-mode) .promo-panel {
+  background: #1f1f23 !important;
+  border-color: #2f2f35;
+  color: #f5f5f7;
+}
+
+:global(.app-shell.dark-mode) .promo-panel h2 {
+  color: #f5f5f7;
 }
 
 .wheel-wrapper {
@@ -290,7 +302,7 @@ async function submitEmail() {
   height: 0;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-top: 28px solid #111;
+  border-top: 28px solid var(--ink);
   z-index: 4;
 }
 
@@ -302,7 +314,7 @@ async function submitEmail() {
   box-shadow: 0 14px 38px rgba(0, 0, 0, 0.16);
   position: relative;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
 }
 
 .wheel-svg {

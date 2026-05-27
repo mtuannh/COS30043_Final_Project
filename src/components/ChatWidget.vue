@@ -395,7 +395,7 @@ async function handleQuickReply(reply) {
   right: 14px;
   background: #111111;
   color: #ffffff;
-  border: none;
+  border: 1px solid transparent;
   padding: 11px 16px;
   border-radius: 50px;
   cursor: pointer;
@@ -405,6 +405,10 @@ async function handleQuickReply(reply) {
   font-weight: 600;
   font-family: inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+:global(.app-shell.dark-mode .chat-widget-btn) {
+  border: 2px solid #ffffff !important;
 }
 
 .chat-widget-btn:hover {

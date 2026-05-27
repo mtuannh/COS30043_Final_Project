@@ -61,12 +61,14 @@ const isAdmin = computed(() => store.user?.role === 'admin');
     </main>
 
     <footer class="border-top bg-light py-4 mt-5">
-      <div class="container d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 small text-secondary">
+      <div class="container d-flex flex-column gap-2 small text-secondary">
         <div class="d-flex flex-column gap-1">
           <span>NovaTech Store, a COS30043 Vue 3 project.</span>
           <span>Responsive ecommerce prototype with REST API persistence.</span>
         </div>
-        <RouterLink v-if="!store.user" class="btn btn-outline-dark btn-sm rounded-pill" to="/login">Admin log in</RouterLink>
+        <div>
+          <RouterLink v-if="!store.user" class="btn btn-outline-dark btn-sm rounded-pill" to="/login">Admin log in</RouterLink>
+        </div>
       </div>
     </footer>
 
