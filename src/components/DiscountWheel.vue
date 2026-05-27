@@ -277,14 +277,8 @@ async function submitEmail() {
   color: var(--ink);
 }
 
-:global(.app-shell.dark-mode) .promo-panel {
-  background: #1f1f23 !important;
-  border-color: #2f2f35;
-  color: #f5f5f7;
-}
-
-:global(.app-shell.dark-mode) .promo-panel h2 {
-  color: #f5f5f7;
+.promo-panel h2 {
+  color: var(--ink);
 }
 
 .wheel-wrapper {

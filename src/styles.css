@@ -1,20 +1,20 @@
 :root {
-  color-scheme: light;
-  --ink: #111111;
-  --muted: #6e6e73;
-  --surface: #f5f5f7;
+  color-scheme: dark;
+  --ink: #f5f5f7;
+  --muted: #b6b6c0;
+  --surface: #1f1f23;
   --radius: 28px;
 }
 
 body {
   margin: 0;
-  background: #ffffff;
+  background: #111111;
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .app-shell {
-  background: #ffffff;
+  background: #111111;
   color: var(--ink);
   display: flex;
   flex-direction: column;
@@ -25,41 +25,32 @@ body {
   flex: 1;
 }
 
-.dark-mode .navbar,
-.dark-mode footer {
+.navbar,
+footer {
   background: #18181b !important;
   border-color: #2f2f35 !important;
 }
 
-.dark-mode .navbar-brand,
-.dark-mode .nav-link,
-.dark-mode .text-secondary {
+.navbar-brand,
+.nav-link,
+.text-secondary {
   color: var(--muted) !important;
 }
 
-.dark-mode .btn-outline-dark {
+.btn-outline-dark {
   color: var(--ink);
   border-color: var(--ink);
 }
 
-.dark-mode .btn-dark {
+.btn-dark {
   background: #f5f5f7;
   border-color: #f5f5f7;
   color: #111111;
 }
 
-.dark-mode .btn-light {
+.btn-light {
   background: #2a2a30;
   border-color: #2a2a30;
-  color: var(--ink);
-}
-
-.app-shell.dark-mode {
-  --ink: #f5f5f7;
-  --muted: #b6b6c0;
-  --surface: #1f1f23;
-
-  background: #111111;
   color: var(--ink);
 }
 
@@ -69,12 +60,6 @@ body {
 
 .hero-section {
   padding: 6rem 1rem;
-  background:
-    radial-gradient(circle at top left, rgba(0, 122, 255, 0.14), transparent 32rem),
-    linear-gradient(180deg, #fbfbfd, #ffffff);
-}
-
-.dark-mode .hero-section {
   background:
     radial-gradient(circle at top left, rgba(0, 122, 255, 0.18), transparent 32rem),
     linear-gradient(180deg, #18181b, #111111);
@@ -117,37 +102,37 @@ body {
   overflow: hidden;
 }
 
-.dark-mode .product-filters {
+.product-filters {
   background: #1f1f23 !important;
   border: 1px solid #2f2f35;
 }
 
-.dark-mode .product-filters .form-control,
-.dark-mode .product-filters .form-select {
+.product-filters .form-control,
+.product-filters .form-select {
   background-color: #111111;
   border: 1px solid #f5f5f7;
   color: var(--ink);
 }
 
-.dark-mode .product-filters .form-control::placeholder {
+.product-filters .form-control::placeholder {
   color: var(--muted);
 }
 
-.dark-mode .product-filters .form-control:focus,
-.dark-mode .product-filters .form-select:focus {
+.product-filters .form-control:focus,
+.product-filters .form-select:focus {
   background-color: #111111;
   border-color: #ffffff;
   box-shadow: 0 0 0 0.25rem rgba(245, 245, 247, 0.16);
   color: var(--ink);
 }
 
-.dark-mode .product-card {
+.product-card {
   background: #1f1f23;
   border: 1px solid #2f2f35 !important;
   color: var(--ink);
 }
 
-.dark-mode .product-card .card-body {
+.product-card .card-body {
   background: #1f1f23;
 }
 
@@ -196,24 +181,24 @@ body {
   padding: 1.25rem 0;
 }
 
-.dark-mode .contact-form .form-control {
+.contact-form .form-control {
   background: #111111;
   border: 1px solid #f5f5f7;
   color: var(--ink);
 }
 
-.dark-mode .contact-form .form-control:focus {
+.contact-form .form-control:focus {
   background: #111111;
   border-color: #ffffff;
   box-shadow: 0 0 0 0.25rem rgba(245, 245, 247, 0.16);
   color: var(--ink);
 }
 
-.dark-mode .admin-table {
+.admin-table {
   border-color: #2f2f35 !important;
 }
 
-.dark-mode .admin-table .table {
+.admin-table .table {
   --bs-table-bg: #1f1f23;
   --bs-table-border-color: #2f2f35;
   --bs-table-color: var(--ink);
@@ -221,18 +206,18 @@ body {
   --bs-table-hover-color: var(--ink);
 }
 
-.dark-mode .admin-table .table-light {
+.admin-table .table-light {
   --bs-table-bg: #111111;
   --bs-table-color: var(--ink);
   --bs-table-border-color: #2f2f35;
 }
 
-.dark-mode .admin-table .btn-outline-dark {
+.admin-table .btn-outline-dark {
   border-color: #f5f5f7;
   color: var(--ink);
 }
 
-.dark-mode .admin-table .btn-outline-danger {
+.admin-table .btn-outline-danger {
   border-color: #ff8fa3;
   color: #ffb3c1;
 }
@@ -248,15 +233,11 @@ body {
 }
 
 .metric-card {
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 1.5rem;
-}
-
-.dark-mode .metric-card {
   background: #111111;
   border: 1px solid #2f2f35;
+  border-radius: 22px;
   color: var(--ink);
+  padding: 1.5rem;
 }
 
 .metric-card span {
@@ -271,27 +252,18 @@ body {
 }
 
 .page-link {
-  color: var(--ink);
-}
-
-.dark-mode .page-link {
   background: #1f1f23;
   border-color: #2f2f35;
   color: var(--ink);
 }
 
-.dark-mode .page-item.disabled .page-link {
+.page-item.disabled .page-link {
   background: #18181b;
   border-color: #2f2f35;
   color: var(--muted);
 }
 
 .active > .page-link {
-  background: var(--ink);
-  border-color: var(--ink);
-}
-
-.dark-mode .active > .page-link {
   background: #f5f5f7;
   border-color: #f5f5f7;
   color: #111111;

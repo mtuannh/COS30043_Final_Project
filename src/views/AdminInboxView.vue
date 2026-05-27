@@ -177,7 +177,7 @@ onUnmounted(() => clearInterval(refreshTimer));
 
 <style scoped>
 .admin-inbox-page {
-  color: #111111;
+  color: var(--ink);
   min-height: calc(100vh - 73px);
 }
 
@@ -461,83 +461,83 @@ onUnmounted(() => clearInterval(refreshTimer));
 </style>
 
 <style>
-.dark-mode .admin-inbox-page {
+.admin-inbox-page {
   background:
     radial-gradient(circle at top left, rgba(0, 113, 227, 0.12), transparent 28rem),
     #111111;
   color: var(--ink);
 }
 
-.dark-mode .admin-inbox-page .badge.bg-dark {
+.admin-inbox-page .badge.bg-dark {
   background-color: #f5f5f7 !important;
   color: #111111;
 }
 
-.dark-mode .admin-inbox-page .conv-list,
-.dark-mode .admin-inbox-page .thread-panel {
+.admin-inbox-page .conv-list,
+.admin-inbox-page .thread-panel {
   background: #18181b;
   border: 1px solid #2f2f35;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
 }
 
-.dark-mode .admin-inbox-page .conv-item {
+.admin-inbox-page .conv-item {
   color: var(--ink);
 }
 
-.dark-mode .admin-inbox-page .conv-item:hover {
+.admin-inbox-page .conv-item:hover {
   background: #24242a;
 }
 
-.dark-mode .admin-inbox-page .conv-item.active {
+.admin-inbox-page .conv-item.active {
   background: #f5f5f7;
   color: #111111;
 }
 
-.dark-mode .admin-inbox-page .conv-item.active .conv-phone,
-.dark-mode .admin-inbox-page .conv-item.active .conv-time,
-.dark-mode .admin-inbox-page .conv-item.active .conv-preview {
+.admin-inbox-page .conv-item.active .conv-phone,
+.admin-inbox-page .conv-item.active .conv-time,
+.admin-inbox-page .conv-item.active .conv-preview {
   color: rgba(17, 17, 17, 0.62) !important;
 }
 
-.dark-mode .admin-inbox-page .conv-phone,
-.dark-mode .admin-inbox-page .conv-time,
-.dark-mode .admin-inbox-page .conv-preview,
-.dark-mode .admin-inbox-page .thread-empty .text-secondary,
-.dark-mode .admin-inbox-page .thread-header .text-secondary,
-.dark-mode .admin-inbox-page .tmsg-label {
+.admin-inbox-page .conv-phone,
+.admin-inbox-page .conv-time,
+.admin-inbox-page .conv-preview,
+.admin-inbox-page .thread-empty .text-secondary,
+.admin-inbox-page .thread-header .text-secondary,
+.admin-inbox-page .tmsg-label {
   color: var(--muted) !important;
 }
 
-.dark-mode .admin-inbox-page .thread-header,
-.dark-mode .admin-inbox-page .thread-reply {
+.admin-inbox-page .thread-header,
+.admin-inbox-page .thread-reply {
   background: #1f1f23;
   border-color: #2f2f35;
 }
 
-.dark-mode .admin-inbox-page .tbubble-customer,
-.dark-mode .admin-inbox-page .tbubble-bot {
+.admin-inbox-page .tbubble-customer,
+.admin-inbox-page .tbubble-bot {
   background: #2a2a30;
   border: 1px solid #3a3a42;
   color: var(--ink);
   box-shadow: none;
 }
 
-.dark-mode .admin-inbox-page .reply-input {
+.admin-inbox-page .reply-input {
   background: #111111;
   border-color: #3a3a42;
   color: var(--ink);
 }
 
-.dark-mode .admin-inbox-page .reply-input::placeholder {
+.admin-inbox-page .reply-input::placeholder {
   color: var(--muted);
 }
 
-.dark-mode .admin-inbox-page .reply-input:focus {
+.admin-inbox-page .reply-input:focus {
   background: #111111;
   border-color: #f5f5f7;
 }
 
-.dark-mode .admin-inbox-page .reply-btn {
+.admin-inbox-page .reply-btn {
   background: #f5f5f7;
   color: #111111;
 }

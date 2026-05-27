@@ -1,25 +1,17 @@
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 import ChatWidget from './components/ChatWidget.vue';
 
 const store = inject('store');
-
-const savedTheme = localStorage.getItem('novatech-theme');
-const isDarkMode = ref(savedTheme === 'dark');
-
-function toggleDarkMode() {
-  isDarkMode.value = !isDarkMode.value;
-  localStorage.setItem('novatech-theme', isDarkMode.value ? 'dark' : 'light');
-}
 
 const cartCount = computed(() => store.cart.reduce((total, item) => total + item.quantity, 0));
 const isAdmin = computed(() => store.user?.role === 'admin');
 </script>
 
 <template>
-  <div class="app-shell" :class="{ 'dark-mode': isDarkMode }">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+  <div class="app-shell">
+    <nav class="navbar navbar-expand-lg navbar-dark border-bottom sticky-top">
       <div class="container">
         <RouterLink class="navbar-brand fw-bold" to="/">NovaTech</RouterLink>
         <button
@@ -44,9 +36,6 @@ const isAdmin = computed(() => store.user?.role === 'admin');
           </ul>
 
           <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-dark rounded-pill" type="button" @click="toggleDarkMode">
-                {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
-            </button>
             <RouterLink v-if="!isAdmin" class="btn btn-outline-dark rounded-pill" to="/cart">
               Bag <span class="badge text-bg-dark ms-1">{{ cartCount }}</span>
             </RouterLink>
@@ -60,7 +49,7 @@ const isAdmin = computed(() => store.user?.role === 'admin');
       <RouterView />
     </main>
 
-    <footer class="border-top bg-light py-4 mt-5">
+    <footer class="border-top py-4 mt-5">
       <div class="container d-flex flex-column gap-2 small text-secondary">
         <div class="d-flex flex-column gap-1">
           <span>NovaTech Store, a COS30043 Vue 3 project.</span>
