@@ -47,7 +47,7 @@ const isAdmin = computed(() => store.user?.role === 'admin');
           <button class="btn btn-outline-dark rounded-pill" type="button" @click="toggleDarkMode">
                 {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
             </button>
-            <RouterLink class="btn btn-outline-dark rounded-pill" to="/cart">
+            <RouterLink v-if="!isAdmin" class="btn btn-outline-dark rounded-pill" to="/cart">
               Bag <span class="badge text-bg-dark ms-1">{{ cartCount }}</span>
             </RouterLink>
             <RouterLink v-if="store.user" class="btn btn-light rounded-pill" to="/profile">{{ store.user.name }}</RouterLink>

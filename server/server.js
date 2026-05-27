@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-ec65c183cb2215faf013e92871a8e51afec43dc0
+import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -85,6 +84,165 @@ async function seedIfEmpty() {
 function withoutPassword(user) {
   const { password, ...safeUser } = user;
   return safeUser;
+}
+
+function isBcryptHash(password) {
+  return typeof password === 'string' && /^\$2[aby]\$\d{2}\$/.test(password);
+}
+
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function migratePlainTextPasswords() {
+  let migratedCount = 0;
+  const cursor = users.find({ password: { $exists: true, $type: 'string' } });
+
+  for await (const user of cursor) {
+    if (isBcryptHash(user.password)) {
+      continue;
+    }
+
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+    await users.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
+    migratedCount += 1;
+  }
+
+  if (migratedCount > 0) {
+    console.log(`Migrated ${migratedCount} user password(s) to bcrypt hashes`);
+  }
+}
+
+async function migrateCustomerRoles() {
+  const result = await users.updateMany({ role: 'customer' }, { $set: { role: 'admin' } });
+
+  if (result.modifiedCount > 0) {
+    console.log(`Migrated ${result.modifiedCount} customer account(s) to admin role`);
+  }
+}
+
+function signToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: jwtExpiresIn }
+  );
+}
+
+function authResponse(user) {
+  return {
+    token: signToken(user),
+    user: withoutPassword(user)
+  };
+}
+
+function authenticateToken(req, res, next) {
+  const [scheme, token] = String(req.headers.authorization || '').split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    res.status(401).json({ message: 'Authentication token is required' });
+    return;
+  }
+
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ message: 'Invalid or expired authentication token' });
+  }
+}
+
+function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') {
+    res.status(403).json({ message: 'Admin access is required' });
+    return;
+  }
+
+  next();
+}
+
+function pickDiscountSegment() {
+  const totalWeight = DISCOUNT_SEGMENTS.reduce((total, segment) => total + segment.weight, 0);
+  let ticket = randomInt(totalWeight);
+
+  for (const [index, segment] of DISCOUNT_SEGMENTS.entries()) {
+    if (ticket < segment.weight) {
+      return { segment, index };
+    }
+    ticket -= segment.weight;
+  }
+
+  return {
+    segment: DISCOUNT_SEGMENTS[0],
+    index: 0
+  };
+}
+
+function buildDiscountCode({ label, percent }) {
+  const prefix = percent > 0 ? `NT${percent}` : label.replace(/\W+/g, '').toUpperCase().slice(0, 8);
+  return `${prefix}-${randomBytes(3).toString('hex').toUpperCase()}`;
+}
+
+function getEmailTransporter() {
+  if (emailTransporter) {
+    return emailTransporter;
+  }
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS } = process.env;
+
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+    throw new Error('SMTP email settings are not fully configured in .env');
+  }
+
+  emailTransporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT),
+    secure: String(SMTP_SECURE).toLowerCase() === 'true',
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS
+    }
+  });
+
+  return emailTransporter;
+}
+
+async function verifyEmailOnStartup() {
+  try {
+    await getEmailTransporter().verify();
+    console.log('Email transporter is ready');
+  } catch (error) {
+    emailTransporter = null;
+    console.warn(`Email transporter is not ready: ${error.message}`);
+  }
+}
+
+async function sendDiscountEmail({ to, code, segment }) {
+  const transporter = getEmailTransporter();
+  const from = process.env.DISCOUNT_FROM_EMAIL || process.env.SMTP_USER;
+  const discountText = segment.label === 'Free Shipping'
+    ? 'free shipping'
+    : `${segment.percent}% off`;
+
+  await transporter.sendMail({
+    from,
+    to,
+    subject: 'Your NovaTech discount code',
+    text: [
+      `Thanks for spinning the NovaTech reward wheel.`,
+      `You won ${discountText}.`,
+      `Your discount code is: ${code}`,
+      `Use it before checkout.`
+    ].join('\n')
+  });
 }
 
 const app = express();
