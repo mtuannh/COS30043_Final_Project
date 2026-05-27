@@ -1,15 +1,19 @@
 import 'dotenv/config';
-import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { MongoClient } from 'mongodb';
-import { randomUUID } from 'node:crypto';
+import nodemailer from 'nodemailer';
+import { randomBytes, randomInt, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.join(__dirname, '..');
+
+dotenv.config({ path: path.join(projectRoot, '.env') });
+
 const dbPath = path.join(__dirname, 'db.json');
 const port = process.env.PORT || 3001;
 const saltRounds = 10;
@@ -30,6 +34,18 @@ const client = new MongoClient(process.env.MONGODB_URI);
 let users;
 let products;
 let messages;
+let discountSpins;
+
+const DISCOUNT_SEGMENTS = [
+  { label: '5% OFF', percent: 5, weight: 30 },
+  { label: '10% OFF', percent: 10, weight: 25 },
+  { label: '15% OFF', percent: 15, weight: 20 },
+  { label: '20% OFF', percent: 20, weight: 12 },
+  { label: 'Free Shipping', percent: 0, weight: 8 },
+  { label: '25% OFF', percent: 25, weight: 5 }
+];
+
+let emailTransporter;
 
 async function connectDatabase() {
   await client.connect();
@@ -37,6 +53,7 @@ async function connectDatabase() {
   users = db.collection('users');
   products = db.collection('products');
   messages = db.collection('messages');
+  discountSpins = db.collection('discountSpins');
   await seedIfEmpty();
   await migratePlainTextPasswords();
   await migrateCustomerRoles();
@@ -66,89 +83,6 @@ async function seedIfEmpty() {
 function withoutPassword(user) {
   const { password, ...safeUser } = user;
   return safeUser;
-}
-
-function isBcryptHash(password) {
-  return typeof password === 'string' && /^\$2[aby]\$\d{2}\$/.test(password);
-}
-
-function normalizeEmail(email) {
-  return String(email || '').trim().toLowerCase();
-}
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-async function migratePlainTextPasswords() {
-  let migratedCount = 0;
-  const cursor = users.find({ password: { $exists: true, $type: 'string' } });
-
-  for await (const user of cursor) {
-    if (isBcryptHash(user.password)) {
-      continue;
-    }
-
-    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-    await users.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
-    migratedCount += 1;
-  }
-
-  if (migratedCount > 0) {
-    console.log(`Migrated ${migratedCount} user password(s) to bcrypt hashes`);
-  }
-}
-
-async function migrateCustomerRoles() {
-  const result = await users.updateMany({ role: 'customer' }, { $set: { role: 'admin' } });
-
-  if (result.modifiedCount > 0) {
-    console.log(`Migrated ${result.modifiedCount} customer account(s) to admin role`);
-  }
-}
-
-function signToken(user) {
-  return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: jwtExpiresIn }
-  );
-}
-
-function authResponse(user) {
-  return {
-    token: signToken(user),
-    user: withoutPassword(user)
-  };
-}
-
-function authenticateToken(req, res, next) {
-  const [scheme, token] = String(req.headers.authorization || '').split(' ');
-
-  if (scheme !== 'Bearer' || !token) {
-    res.status(401).json({ message: 'Authentication token is required' });
-    return;
-  }
-
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    res.status(401).json({ message: 'Invalid or expired authentication token' });
-  }
-}
-
-function requireAdmin(req, res, next) {
-  if (req.user?.role !== 'admin') {
-    res.status(403).json({ message: 'Admin access is required' });
-    return;
-  }
-
-  next();
 }
 
 const app = express();
@@ -339,11 +273,118 @@ app.post('/api/messages', async (req, res) => {
   res.status(201).json(message);
 });
 
+app.post('/api/discounts/spin', async (req, res) => {
+  const { segment, index } = pickDiscountSegment();
+  const spinId = randomUUID();
+
+  const spinRecord = {
+    id: spinId,
+    segmentIndex: index,
+    discountLabel: segment.label,
+    discountPercent: segment.percent,
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    claimed: false
+  };
+
+  await discountSpins.insertOne(spinRecord);
+
+  const sectionAngle = 360 / DISCOUNT_SEGMENTS.length;
+  const stopAngle = 360 - (index * sectionAngle + sectionAngle / 2);
+
+  res.status(201).json({
+    spinId,
+    segmentIndex: index,
+    discountLabel: segment.label,
+    discountPercent: segment.percent,
+    stopAngle
+  });
+});
+
+app.post('/api/discounts/claim', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const spinId = String(req.body.spinId || '');
+
+  if (!spinId) {
+    res.status(400).json({ message: 'Missing spin ID' });
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    res.status(400).json({ message: 'Please provide a valid email address' });
+    return;
+  }
+
+  const spinRecord = await discountSpins.findOne({ id: spinId });
+  if (!spinRecord) {
+    res.status(404).json({ message: 'Spin not found. Please spin again.' });
+    return;
+  }
+
+  if (spinRecord.claimed) {
+    res.status(409).json({ message: 'This spin has already been used.' });
+    return;
+  }
+
+  if (new Date(spinRecord.expiresAt).getTime() < Date.now()) {
+    res.status(410).json({ message: 'This spin has expired. Please spin again.' });
+    return;
+  }
+
+  const code = buildDiscountCode({
+    label: spinRecord.discountLabel,
+    percent: spinRecord.discountPercent
+  });
+
+  try {
+    await sendDiscountEmail({
+      to: email,
+      code,
+      segment: {
+        label: spinRecord.discountLabel,
+        percent: spinRecord.discountPercent
+      }
+    });
+  } catch (error) {
+    console.error('Failed to send discount email:', error);
+    res.status(502).json({ message: 'Unable to send discount email right now. Please try again.' });
+    return;
+  }
+
+  await discountSpins.updateOne(
+    { id: spinId },
+    {
+      $set: {
+        claimed: true,
+        claimedAt: new Date().toISOString(),
+        email,
+        code
+      }
+    }
+  );
+
+  res.status(201).json({
+    ok: true,
+    message: 'Discount code sent',
+    discountLabel: spinRecord.discountLabel
+  });
+});
+
 async function start() {
   await connectDatabase();
+  await verifyEmailOnStartup();
 
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`NovaTech API running at http://localhost:${port}/api`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use by another process.`);
+      console.error('Run: lsof -i :3001   then kill that PID, and run npm run start again.');
+      process.exit(1);
+    }
+    throw error;
   });
 }
 
