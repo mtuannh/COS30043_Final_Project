@@ -6,8 +6,19 @@ NovaTech Store is an Apple-inspired ecommerce web application for COS30043 Inter
 
 ```bash
 npm install
+```
+
+```
+frontend
+npm run dev
+```
+
+```backend
+npm run api
+or 
 npm run start
 ```
+
 
 The frontend runs on `http://localhost:5173` and the API runs on `http://localhost:3001/api`.
 
