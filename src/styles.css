@@ -127,13 +127,13 @@ footer {
 }
 
 .product-card {
-  background: #1f1f23;
-  border: 1px solid #2f2f35 !important;
+  background: #24242a;
+  border: 1.5px solid #44444d !important;
   color: var(--ink);
 }
 
 .product-card .card-body {
-  background: #1f1f23;
+  background: #24242a;
 }
 
 .product-image,

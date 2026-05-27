@@ -13,7 +13,7 @@ const store = inject('store');
 </script>
 
 <template>
-  <article class="card product-card h-100 border-0 shadow-sm">
+  <article class="card product-card h-100 shadow-sm">
     <div class="product-image" :style="{ background: product.gradient }" role="img" :aria-label="product.name"></div>
     <div class="card-body d-flex flex-column">
       <p class="text-uppercase text-secondary small mb-1">{{ product.category }}</p>
