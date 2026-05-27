@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-ec65c183cb2215faf013e92871a8e51afec43dc0
+import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
