@@ -23,9 +23,9 @@ onMounted(async () => {
 
 <template>
   <template v-if="isAdmin">
-    <section class="hero-section">
+    <section class="hero-section admin-hero-section">
       <div class="container">
-        <div class="d-flex flex-column flex-lg-row justify-content-between gap-4 align-items-lg-end">
+        <div>
           <div>
             <p class="eyebrow">Admin dashboard</p>
             <h1 class="display-4 fw-bold">Welcome back, {{ store.user.name }}.</h1>
@@ -33,16 +33,11 @@ onMounted(async () => {
               Manage the catalogue, review customer messages, and keep the NovaTech storefront up to date.
             </p>
           </div>
-          <div class="d-flex gap-2 flex-wrap">
-            <RouterLink class="btn btn-dark rounded-pill px-4" to="/admin/products/new">Create product</RouterLink>
-            <RouterLink class="btn btn-outline-dark rounded-pill px-4" to="/admin">Manage catalogue</RouterLink>
-            <RouterLink class="btn btn-outline-dark rounded-pill px-4" to="/admin/inbox">Open inbox</RouterLink>
-          </div>
         </div>
       </div>
     </section>
 
-    <section class="container py-5">
+    <section class="container admin-dashboard-content">
       <div class="row g-3 mb-4">
         <div class="col-12 col-md-4">
           <div class="metric-card">

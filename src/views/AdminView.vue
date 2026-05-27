@@ -1,13 +1,10 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { api } from '../services/api';
 
 const products = ref([]);
 const message = ref('');
-const adminMessage = ref('');
-const adminError = ref('');
-const adminForm = reactive({ name: '', email: '', password: '' });
 
 async function loadProducts() {
   const response = await api.getProducts({ limit: 100 });
@@ -19,24 +16,6 @@ async function deleteProduct(id) {
   await api.deleteProduct(id);
   message.value = 'Product deleted.';
   loadProducts();
-}
-
-async function createAdmin() {
-  adminMessage.value = '';
-  adminError.value = '';
-
-  if (!adminForm.name || !adminForm.email || adminForm.password.length < 6) {
-    adminError.value = 'Name, email, and password of at least 6 characters are required.';
-    return;
-  }
-
-  try {
-    const admin = await api.createAdmin(adminForm);
-    adminMessage.value = `${admin.name} can now sign in as an admin.`;
-    Object.assign(adminForm, { name: '', email: '', password: '' });
-  } catch (err) {
-    adminError.value = err.message;
-  }
 }
 
 onMounted(loadProducts);
@@ -53,30 +32,6 @@ onMounted(loadProducts);
     </div>
 
     <p v-if="message" class="alert alert-success">{{ message }}</p>
-
-    <div class="admin-card rounded-4 border p-4 mb-4">
-      <h2 class="h4 fw-bold">Create admin account</h2>
-      <p class="text-secondary">Only signed-in admins can create another administrator.</p>
-      <p v-if="adminMessage" class="alert alert-success">{{ adminMessage }}</p>
-      <p v-if="adminError" class="alert alert-danger">{{ adminError }}</p>
-      <form class="row g-3" @submit.prevent="createAdmin">
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="admin-name">Name</label>
-          <input id="admin-name" v-model.trim="adminForm.name" class="form-control" type="text" required />
-        </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="admin-email">Email</label>
-          <input id="admin-email" v-model.trim="adminForm.email" class="form-control" type="email" required />
-        </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="admin-password">Password</label>
-          <input id="admin-password" v-model="adminForm.password" class="form-control" type="password" minlength="6" required />
-        </div>
-        <div class="col-12">
-          <button class="btn btn-outline-dark rounded-pill" type="submit">Create admin</button>
-        </div>
-      </form>
-    </div>
 
     <div class="admin-table table-responsive rounded-4 border">
       <table class="table align-middle mb-0">

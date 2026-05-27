@@ -84,6 +84,15 @@ body {
   max-width: 720px;
 }
 
+.admin-hero-section {
+  padding-bottom: 2rem;
+}
+
+.admin-dashboard-content {
+  padding-bottom: 3rem;
+  padding-top: 2rem;
+}
+
 .eyebrow {
   color: #0071e3;
   font-size: 0.78rem;
