@@ -1,7 +1,6 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
-
-const CONV_STORE_KEY = 'novatech-conversations';
+import { api } from '../services/api.js';
 
 const conversations = ref([]);
 const selectedId = ref(null);
@@ -11,10 +10,9 @@ let refreshTimer = null;
 
 const selected = computed(() => conversations.value.find(c => c.id === selectedId.value) || null);
 
-function load() {
+async function load() {
   try {
-    const raw = JSON.parse(localStorage.getItem(CONV_STORE_KEY) || '[]');
-    conversations.value = raw.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    conversations.value = await api.getChatConversations();
   } catch {
     conversations.value = [];
   }
@@ -29,21 +27,19 @@ function scrollThread() {
   if (threadEl.value) threadEl.value.scrollTop = threadEl.value.scrollHeight;
 }
 
-function sendReply() {
+async function deleteConversation(id) {
+  if (!confirm('Delete this conversation? This cannot be undone.')) return;
+  await api.deleteChatConversation(id);
+  if (selectedId.value === id) selectedId.value = null;
+  await load();
+}
+
+async function sendReply() {
   const text = replyText.value.trim();
   if (!text || !selectedId.value) return;
-
-  const raw = JSON.parse(localStorage.getItem(CONV_STORE_KEY) || '[]');
-  const conv = raw.find(c => c.id === selectedId.value);
-  if (!conv) return;
-
-  const time = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
-  conv.messages.push({ sender: 'admin', text, time, timestamp: new Date().toISOString() });
-  conv.updatedAt = new Date().toISOString();
-  localStorage.setItem(CONV_STORE_KEY, JSON.stringify(raw));
-
   replyText.value = '';
-  load();
+  await api.replyChatConversation(selectedId.value, text);
+  await load();
   nextTick(scrollThread);
 }
 
@@ -127,10 +123,13 @@ onUnmounted(() => clearInterval(refreshTimer));
             <!-- Thread Header -->
             <div class="thread-header">
               <div class="thread-avatar">{{ selected.customerName.charAt(0).toUpperCase() }}</div>
-              <div>
+              <div style="flex:1">
                 <div class="fw-semibold">{{ selected.customerName }}</div>
                 <div class="small text-secondary">{{ selected.customerPhone }} · Started {{ formatDate(selected.createdAt) }}</div>
               </div>
+              <button class="delete-conv-btn" @click="deleteConversation(selected.id)" title="Delete conversation">
+                Delete
+              </button>
             </div>
 
             <!-- Messages -->
@@ -340,13 +339,13 @@ onUnmounted(() => clearInterval(refreshTimer));
   max-width: 70%;
 }
 
-.tmsg-customer {
+.tmsg-admin,
+.tmsg-bot {
   align-self: flex-end;
   align-items: flex-end;
 }
 
-.tmsg-admin,
-.tmsg-bot {
+.tmsg-customer {
   align-self: flex-start;
   align-items: flex-start;
 }
@@ -374,19 +373,19 @@ onUnmounted(() => clearInterval(refreshTimer));
 .tbubble-customer {
   background: #111111;
   color: #ffffff;
-  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
 .tbubble-admin {
   background: #0071e3;
   color: #ffffff;
-  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .tbubble-bot {
   background: #ffffff;
   color: #111111;
-  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -399,6 +398,25 @@ onUnmounted(() => clearInterval(refreshTimer));
   border-top: 1px solid #e5e5ea;
   align-items: flex-end;
   flex-shrink: 0;
+}
+
+.delete-conv-btn {
+  padding: 6px 14px;
+  background: transparent;
+  color: #e3000b;
+  border: 1.5px solid #e3000b;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.18s, color 0.18s;
+}
+
+.delete-conv-btn:hover {
+  background: #e3000b;
+  color: #ffffff;
 }
 
 .reply-input {

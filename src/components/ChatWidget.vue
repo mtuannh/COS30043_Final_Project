@@ -1,17 +1,14 @@
 <script setup>
 import { computed, nextTick, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { api } from '../services/api.js';
 
 const STORAGE_KEY = 'novatech-chat';
-const CONV_STORE_KEY = 'novatech-conversations';
 
 const router = useRouter();
 
 const QUICK_REPLIES = [
   { label: 'Browse Products', type: 'nav', route: { path: '/products' } },
-  { label: 'View iPhones', type: 'nav', route: { path: '/products', query: { category: 'iphone' } } },
-  { label: 'View MacBooks', type: 'nav', route: { path: '/products', query: { category: 'macbook' } } },
-  { label: 'View iPads', type: 'nav', route: { path: '/products', query: { category: 'ipad' } } },
   {
     label: 'Check Order Status',
     type: 'auto',
@@ -61,56 +58,36 @@ function now() {
   return new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
 }
 
-// ── Conversation store helpers ──────────────────────────────────────────────
-function getConversations() {
-  try { return JSON.parse(localStorage.getItem(CONV_STORE_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function saveConversations(convs) {
-  localStorage.setItem(CONV_STORE_KEY, JSON.stringify(convs));
-}
-
-function createConversation() {
-  const id = crypto.randomUUID();
-  conversationId.value = id;
-  const convs = getConversations();
-  convs.push({
-    id,
+// ── Conversation helpers ────────────────────────────────────────────────────
+async function createConversation() {
+  const conv = await api.createChatConversation({
     customerName: formName.value.trim(),
     customerPhone: formPhone.value.trim(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    messages: [],
   });
-  saveConversations(convs);
+  conversationId.value = conv.id;
 }
 
 function appendToConversation(sender, text) {
   if (!conversationId.value) return;
-  const convs = getConversations();
-  const conv = convs.find(c => c.id === conversationId.value);
-  if (!conv) return;
-  conv.messages.push({ sender, text, time: now(), timestamp: new Date().toISOString() });
-  conv.updatedAt = new Date().toISOString();
-  saveConversations(convs);
+  api.addChatMessage(conversationId.value, { sender, text, time: now() }).catch(() => {});
 }
 
 // ── Polling for admin replies ───────────────────────────────────────────────
 function startPolling() {
   stopPolling();
-  pollTimer = setInterval(() => {
+  pollTimer = setInterval(async () => {
     if (!conversationId.value) return;
-    const conv = getConversations().find(c => c.id === conversationId.value);
-    if (!conv) return;
-    const adminInStore = conv.messages.filter(m => m.sender === 'admin');
-    const adminShown = messages.value.filter(m => m.type === 'admin').length;
-    const fresh = adminInStore.slice(adminShown);
-    for (const msg of fresh) {
-      messages.value.push({ type: 'admin', text: msg.text, time: msg.time });
-      nextTick(scrollToBottom);
-    }
-    if (fresh.length > 0) saveState();
+    try {
+      const conv = await api.getChatConversation(conversationId.value);
+      const adminInStore = conv.messages.filter(m => m.sender === 'admin');
+      const adminShown = messages.value.filter(m => m.type === 'admin').length;
+      const fresh = adminInStore.slice(adminShown);
+      for (const msg of fresh) {
+        messages.value.push({ type: 'admin', text: msg.text, time: msg.time });
+        nextTick(scrollToBottom);
+      }
+      if (fresh.length > 0) saveState();
+    } catch { /* ignore network errors */ }
   }, 5000);
 }
 
@@ -202,7 +179,7 @@ async function submitForm() {
   }
   formError.value = '';
   phase.value = 'chat';
-  createConversation();
+  await createConversation();
   saveState();
 
   await nextTick(scrollToBottom);
@@ -220,7 +197,6 @@ async function sendMessage() {
   inputText.value = '';
   showQuickReplies.value = false;
   pushMessage('user', text);
-  await botReply("Thank you for your message! Please wait while our team reviews your inquiry. We'll respond as soon as possible.");
   showQuickReplies.value = true;
   nextTick(scrollToBottom);
 }
@@ -283,7 +259,7 @@ async function handleQuickReply(reply) {
       <!-- Body -->
       <div class="chat-body">
         <!-- Phase: Chat Messages -->
-        <div v-if="phase === 'chat'" class="chat-messages" ref="messagesEl">
+        <div v-if="phase === 'chat'" class="chat-messages" ref="messagesEl" @click="showQuickReplies = false">
           <div
             v-for="(msg, i) in messages"
             :key="i"
