@@ -36,8 +36,8 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
         <div id="mainNavigation" class="collapse navbar-collapse">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item"><RouterLink class="nav-link" to="/products">Products</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link" to="/about">About</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link" to="/contact">Contact</RouterLink></li>
+            <li v-if="store.user?.role !== 'admin'" class="nav-item"><RouterLink class="nav-link" to="/about">About</RouterLink></li>
+            <li v-if="store.user?.role !== 'admin'" class="nav-item"><RouterLink class="nav-link" to="/contact">Contact</RouterLink></li>
             <li v-if="store.user?.role === 'admin'" class="nav-item"><RouterLink class="nav-link" to="/admin">Manage</RouterLink></li>
             <li v-if="store.user?.role === 'admin'" class="nav-item"><RouterLink class="nav-link" to="/admin/inbox">Inbox</RouterLink></li>
           </ul>
@@ -49,8 +49,7 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
             <RouterLink class="btn btn-outline-dark rounded-pill" to="/cart">
               Bag <span class="badge text-bg-dark ms-1">{{ cartCount }}</span>
             </RouterLink>
-            <RouterLink v-if="!store.user" class="btn btn-dark rounded-pill" to="/login">Sign in</RouterLink>
-            <RouterLink v-else class="btn btn-light rounded-pill" to="/profile">{{ store.user.name }}</RouterLink>
+            <RouterLink v-if="store.user" class="btn btn-light rounded-pill" to="/profile">{{ store.user.name }}</RouterLink>
           </div>
         </div>
       </div>
@@ -61,9 +60,12 @@ const cartCount = computed(() => store.cart.reduce((total, item) => total + item
     </main>
 
     <footer class="border-top bg-light py-4 mt-5">
-      <div class="container d-flex flex-column flex-md-row justify-content-between gap-2 small text-secondary">
-        <span>NovaTech Store, a COS30043 Vue 3 project.</span>
-        <span>Responsive ecommerce prototype with REST API persistence.</span>
+      <div class="container d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 small text-secondary">
+        <div class="d-flex flex-column gap-1">
+          <span>NovaTech Store, a COS30043 Vue 3 project.</span>
+          <span>Responsive ecommerce prototype with REST API persistence.</span>
+        </div>
+        <RouterLink v-if="!store.user" class="btn btn-outline-dark btn-sm rounded-pill" to="/login">Admin log in</RouterLink>
       </div>
     </footer>
 

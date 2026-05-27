@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "@vitejs/plugin-vue": "latest",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "latest",
     "concurrently": "latest",
     "cors": "latest",
     "dotenv": "^17.4.2",
     "express": "latest",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.2.0",
     "vite": "latest",
     "vue": "latest",

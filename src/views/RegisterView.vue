@@ -21,15 +21,15 @@ async function submit() {
     return;
   }
 
-  if (form.password.length < 8) {
-    error.value = 'Password must be at least 8 characters.';
+  if (form.password.length < 6) {
+    error.value = 'Password must be at least 6 characters.';
     return;
   }
 
   try {
-    const user = await api.register(form);
-    store.setUser(user);
-    router.push('/profile');
+    const auth = await api.register(form);
+    store.setAuth(auth);
+    router.push('/admin');
   } catch (err) {
     error.value = err.message;
   }
@@ -39,8 +39,8 @@ async function submit() {
 <template>
   <section class="container auth-layout py-5">
     <div class="auth-card">
-      <p class="eyebrow">Create account</p>
-      <h1 class="h2 fw-bold">Join NovaTech.</h1>
+      <p class="eyebrow">Admin access</p>
+      <h1 class="h2 fw-bold">Create admin account.</h1>
       <p v-if="error" class="alert alert-danger">{{ error }}</p>
 
       <form class="d-grid gap-3" @submit.prevent="submit">
@@ -54,7 +54,7 @@ async function submit() {
         </div>
         <div>
           <label class="form-label" for="password">Password</label>
-          <input id="password" v-model="form.password" class="form-control" type="password" minlength="8" required />
+          <input id="password" v-model="form.password" class="form-control" type="password" minlength="6" required />
         </div>
         <button class="btn btn-dark rounded-pill" type="submit">Create account</button>
       </form>

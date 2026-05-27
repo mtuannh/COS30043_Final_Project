@@ -1,12 +1,19 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    ...options
+    ...options,
+    headers
   });
 
   if (!response.ok) {
@@ -51,6 +58,12 @@ export const api = {
   },
   register(user) {
     return request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(user)
+    });
+  },
+  createAdmin(user) {
+    return request('/admin/create-admin', {
       method: 'POST',
       body: JSON.stringify(user)
     });

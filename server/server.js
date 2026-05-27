@@ -1,6 +1,8 @@
 import 'dotenv/config';
+import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { MongoClient } from 'mongodb';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -10,9 +12,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, 'db.json');
 const port = process.env.PORT || 3001;
+const saltRounds = 10;
+const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
 
 if (!process.env.MONGODB_URI) {
   console.error('MONGODB_URI is not set in .env');
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET is not set in .env');
   process.exit(1);
 }
 
@@ -29,6 +38,8 @@ async function connectDatabase() {
   products = db.collection('products');
   messages = db.collection('messages');
   await seedIfEmpty();
+  await migratePlainTextPasswords();
+  await migrateCustomerRoles();
   console.log(`Connected to MongoDB database "${db.databaseName}"`);
 }
 
@@ -55,6 +66,89 @@ async function seedIfEmpty() {
 function withoutPassword(user) {
   const { password, ...safeUser } = user;
   return safeUser;
+}
+
+function isBcryptHash(password) {
+  return typeof password === 'string' && /^\$2[aby]\$\d{2}\$/.test(password);
+}
+
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function migratePlainTextPasswords() {
+  let migratedCount = 0;
+  const cursor = users.find({ password: { $exists: true, $type: 'string' } });
+
+  for await (const user of cursor) {
+    if (isBcryptHash(user.password)) {
+      continue;
+    }
+
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+    await users.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
+    migratedCount += 1;
+  }
+
+  if (migratedCount > 0) {
+    console.log(`Migrated ${migratedCount} user password(s) to bcrypt hashes`);
+  }
+}
+
+async function migrateCustomerRoles() {
+  const result = await users.updateMany({ role: 'customer' }, { $set: { role: 'admin' } });
+
+  if (result.modifiedCount > 0) {
+    console.log(`Migrated ${result.modifiedCount} customer account(s) to admin role`);
+  }
+}
+
+function signToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: jwtExpiresIn }
+  );
+}
+
+function authResponse(user) {
+  return {
+    token: signToken(user),
+    user: withoutPassword(user)
+  };
+}
+
+function authenticateToken(req, res, next) {
+  const [scheme, token] = String(req.headers.authorization || '').split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    res.status(401).json({ message: 'Authentication token is required' });
+    return;
+  }
+
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ message: 'Invalid or expired authentication token' });
+  }
+}
+
+function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') {
+    res.status(403).json({ message: 'Admin access is required' });
+    return;
+  }
+
+  next();
 }
 
 const app = express();
@@ -102,7 +196,7 @@ app.get('/api/products/:id', async (req, res) => {
   res.json(product);
 });
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', authenticateToken, requireAdmin, async (req, res) => {
   const product = {
     id: randomUUID(),
     likes: 0,
@@ -113,7 +207,7 @@ app.post('/api/products', async (req, res) => {
   res.status(201).json(product);
 });
 
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', authenticateToken, requireAdmin, async (req, res) => {
   const result = await products.findOneAndUpdate(
     { id: req.params.id },
     { $set: req.body },
@@ -128,7 +222,7 @@ app.put('/api/products/:id', async (req, res) => {
   res.json(result);
 });
 
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authenticateToken, requireAdmin, async (req, res) => {
   const result = await products.deleteOne({ id: req.params.id });
 
   if (result.deletedCount === 0) {
@@ -155,21 +249,67 @@ app.post('/api/products/:id/like', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const user = await users.findOne({
-    email: req.body.email,
-    password: req.body.password
-  });
+  const email = normalizeEmail(req.body.email);
+  const password = String(req.body.password || '');
 
-  if (!user) {
+  if (!email || !password) {
     res.status(401).json({ message: 'Invalid email or password' });
     return;
   }
 
-  res.json(withoutPassword(user));
+  const user = await users.findOne({ email });
+  const passwordMatches = user?.password ? await bcrypt.compare(password, user.password) : false;
+
+  if (!passwordMatches) {
+    res.status(401).json({ message: 'Invalid email or password' });
+    return;
+  }
+
+  res.json(authResponse(user));
 });
 
 app.post('/api/auth/register', async (req, res) => {
-  const existing = await users.findOne({ email: req.body.email });
+  const name = String(req.body.name || '').trim();
+  const email = normalizeEmail(req.body.email);
+  const password = String(req.body.password || '');
+
+  if (!name || !isValidEmail(email) || password.length < 6) {
+    res.status(400).json({ message: 'Name, valid email, and password of at least 6 characters are required' });
+    return;
+  }
+
+  const existing = await users.findOne({ email });
+
+  if (existing) {
+    res.status(409).json({ message: 'Email is already registered' });
+    return;
+  }
+
+  // Store only bcrypt hashes so raw passwords are never persisted.
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const user = {
+    id: randomUUID(),
+    name,
+    email,
+    password: hashedPassword,
+    role: 'admin',
+  };
+
+  await users.insertOne(user);
+  res.status(201).json(authResponse(user));
+});
+
+app.post('/api/admin/create-admin', authenticateToken, requireAdmin, async (req, res) => {
+  const name = String(req.body.name || '').trim();
+  const email = normalizeEmail(req.body.email);
+  const password = String(req.body.password || '');
+
+  if (!name || !isValidEmail(email) || password.length < 6) {
+    res.status(400).json({ message: 'Name, valid email, and password of at least 6 characters are required' });
+    return;
+  }
+
+  const existing = await users.findOne({ email });
 
   if (existing) {
     res.status(409).json({ message: 'Email is already registered' });
@@ -178,8 +318,10 @@ app.post('/api/auth/register', async (req, res) => {
 
   const user = {
     id: randomUUID(),
-    role: 'customer',
-    ...req.body
+    name,
+    email,
+    password: await bcrypt.hash(password, saltRounds),
+    role: 'admin'
   };
 
   await users.insertOne(user);

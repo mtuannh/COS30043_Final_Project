@@ -79,101 +79,113 @@ onUnmounted(() => clearInterval(refreshTimer));
 </script>
 
 <template>
-  <div class="container py-5">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-      <div>
-        <p class="eyebrow">Admin</p>
-        <h1 class="display-5 fw-bold">Chat Inbox</h1>
-      </div>
-      <span class="badge bg-dark fs-6">{{ conversations.length }} conversation{{ conversations.length !== 1 ? 's' : '' }}</span>
-    </div>
-
-    <div class="inbox-layout">
-      <!-- Conversation List -->
-      <div class="conv-list">
-        <div v-if="conversations.length === 0" class="empty-state text-center py-5">
-          <p class="text-secondary">No conversations yet.</p>
-          <p class="small text-secondary">Customers who use the chat widget will appear here.</p>
+  <div class="admin-inbox-page py-5">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <p class="eyebrow">Admin</p>
+          <h1 class="display-5 fw-bold">Chat Inbox</h1>
         </div>
-
-        <button
-          v-for="conv in conversations"
-          :key="conv.id"
-          class="conv-item"
-          :class="{ active: conv.id === selectedId }"
-          @click="selectConversation(conv.id)"
-        >
-          <div class="conv-avatar">{{ conv.customerName.charAt(0).toUpperCase() }}</div>
-          <div class="conv-info">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="conv-name">{{ conv.customerName }}</span>
-              <span class="conv-time">{{ formatDate(conv.updatedAt) }}</span>
-            </div>
-            <div class="conv-phone text-secondary">{{ conv.customerPhone }}</div>
-            <div class="conv-preview">{{ lastMessage(conv) }}</div>
-          </div>
-        </button>
+        <span class="badge bg-dark fs-6">{{ conversations.length }} conversation{{ conversations.length !== 1 ? 's' : '' }}</span>
       </div>
 
-      <!-- Thread Panel -->
-      <div class="thread-panel">
-        <!-- Empty state -->
-        <div v-if="!selected" class="thread-empty">
-          <p class="text-secondary">Select a conversation to view messages</p>
-        </div>
-
-        <template v-else>
-          <!-- Thread Header -->
-          <div class="thread-header">
-            <div class="thread-avatar">{{ selected.customerName.charAt(0).toUpperCase() }}</div>
-            <div>
-              <div class="fw-semibold">{{ selected.customerName }}</div>
-              <div class="small text-secondary">{{ selected.customerPhone }} · Started {{ formatDate(selected.createdAt) }}</div>
-            </div>
+      <div class="inbox-layout">
+        <!-- Conversation List -->
+        <div class="conv-list">
+          <div v-if="conversations.length === 0" class="empty-state text-center py-5">
+            <p class="text-secondary">No conversations yet.</p>
+            <p class="small text-secondary">Customers who use the chat widget will appear here.</p>
           </div>
 
-          <!-- Messages -->
-          <div class="thread-messages" ref="threadEl">
-            <div
-              v-for="(msg, i) in selected.messages"
-              :key="i"
-              :class="msg.sender === 'customer' ? 'tmsg-customer' : msg.sender === 'admin' ? 'tmsg-admin' : 'tmsg-bot'"
-            >
-              <div class="tmsg-label">
-                {{ msg.sender === 'customer' ? selected.customerName : msg.sender === 'admin' ? 'You (Admin)' : 'Bot' }}
-                <span class="tmsg-time">· {{ msg.time }}</span>
+          <button
+            v-for="conv in conversations"
+            :key="conv.id"
+            class="conv-item"
+            :class="{ active: conv.id === selectedId }"
+            @click="selectConversation(conv.id)"
+          >
+            <div class="conv-avatar">{{ conv.customerName.charAt(0).toUpperCase() }}</div>
+            <div class="conv-info">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="conv-name">{{ conv.customerName }}</span>
+                <span class="conv-time">{{ formatDate(conv.updatedAt) }}</span>
               </div>
-              <div
-                class="tmsg-bubble"
-                :class="{
-                  'tbubble-customer': msg.sender === 'customer',
-                  'tbubble-admin': msg.sender === 'admin',
-                  'tbubble-bot': msg.sender === 'bot',
-                }"
-              >{{ msg.text }}</div>
+              <div class="conv-phone text-secondary">{{ conv.customerPhone }}</div>
+              <div class="conv-preview">{{ lastMessage(conv) }}</div>
             </div>
+          </button>
+        </div>
+
+        <!-- Thread Panel -->
+        <div class="thread-panel">
+          <!-- Empty state -->
+          <div v-if="!selected" class="thread-empty">
+            <p class="text-secondary">Select a conversation to view messages</p>
           </div>
 
-          <!-- Reply Input -->
-          <div class="thread-reply">
-            <textarea
-              v-model="replyText"
-              class="reply-input"
-              placeholder="Type your reply..."
-              rows="2"
-              @keydown="onReplyKeydown"
-            ></textarea>
-            <button class="reply-btn" :disabled="!replyText.trim()" @click="sendReply">
-              Send Reply
-            </button>
-          </div>
-        </template>
+          <template v-else>
+            <!-- Thread Header -->
+            <div class="thread-header">
+              <div class="thread-avatar">{{ selected.customerName.charAt(0).toUpperCase() }}</div>
+              <div>
+                <div class="fw-semibold">{{ selected.customerName }}</div>
+                <div class="small text-secondary">{{ selected.customerPhone }} · Started {{ formatDate(selected.createdAt) }}</div>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="thread-messages" ref="threadEl">
+              <div
+                v-for="(msg, i) in selected.messages"
+                :key="i"
+                :class="msg.sender === 'customer' ? 'tmsg-customer' : msg.sender === 'admin' ? 'tmsg-admin' : 'tmsg-bot'"
+              >
+                <div class="tmsg-label">
+                  {{ msg.sender === 'customer' ? selected.customerName : msg.sender === 'admin' ? 'You (Admin)' : 'Bot' }}
+                  <span class="tmsg-time">· {{ msg.time }}</span>
+                </div>
+                <div
+                  class="tmsg-bubble"
+                  :class="{
+                    'tbubble-customer': msg.sender === 'customer',
+                    'tbubble-admin': msg.sender === 'admin',
+                    'tbubble-bot': msg.sender === 'bot',
+                  }"
+                >{{ msg.text }}</div>
+              </div>
+            </div>
+
+            <!-- Reply Input -->
+            <div class="thread-reply">
+              <textarea
+                v-model="replyText"
+                class="reply-input"
+                placeholder="Type your reply..."
+                rows="2"
+                @keydown="onReplyKeydown"
+              ></textarea>
+              <button class="reply-btn" :disabled="!replyText.trim()" @click="sendReply">
+                Send Reply
+              </button>
+            </div>
+          </template>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.admin-inbox-page {
+  color: #111111;
+  min-height: calc(100vh - 73px);
+}
+
+.badge.bg-dark {
+  background-color: #111111 !important;
+  color: #ffffff;
+}
+
 .inbox-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -201,6 +213,7 @@ onUnmounted(() => clearInterval(refreshTimer));
   border-radius: 12px;
   border: none;
   background: transparent;
+  color: #111111;
   text-align: left;
   cursor: pointer;
   width: 100%;
@@ -444,5 +457,88 @@ onUnmounted(() => clearInterval(refreshTimer));
   .thread-panel {
     height: 500px;
   }
+}
+</style>
+
+<style>
+.dark-mode .admin-inbox-page {
+  background:
+    radial-gradient(circle at top left, rgba(0, 113, 227, 0.12), transparent 28rem),
+    #111111;
+  color: var(--ink);
+}
+
+.dark-mode .admin-inbox-page .badge.bg-dark {
+  background-color: #f5f5f7 !important;
+  color: #111111;
+}
+
+.dark-mode .admin-inbox-page .conv-list,
+.dark-mode .admin-inbox-page .thread-panel {
+  background: #18181b;
+  border: 1px solid #2f2f35;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+}
+
+.dark-mode .admin-inbox-page .conv-item {
+  color: var(--ink);
+}
+
+.dark-mode .admin-inbox-page .conv-item:hover {
+  background: #24242a;
+}
+
+.dark-mode .admin-inbox-page .conv-item.active {
+  background: #f5f5f7;
+  color: #111111;
+}
+
+.dark-mode .admin-inbox-page .conv-item.active .conv-phone,
+.dark-mode .admin-inbox-page .conv-item.active .conv-time,
+.dark-mode .admin-inbox-page .conv-item.active .conv-preview {
+  color: rgba(17, 17, 17, 0.62) !important;
+}
+
+.dark-mode .admin-inbox-page .conv-phone,
+.dark-mode .admin-inbox-page .conv-time,
+.dark-mode .admin-inbox-page .conv-preview,
+.dark-mode .admin-inbox-page .thread-empty .text-secondary,
+.dark-mode .admin-inbox-page .thread-header .text-secondary,
+.dark-mode .admin-inbox-page .tmsg-label {
+  color: var(--muted) !important;
+}
+
+.dark-mode .admin-inbox-page .thread-header,
+.dark-mode .admin-inbox-page .thread-reply {
+  background: #1f1f23;
+  border-color: #2f2f35;
+}
+
+.dark-mode .admin-inbox-page .tbubble-customer,
+.dark-mode .admin-inbox-page .tbubble-bot {
+  background: #2a2a30;
+  border: 1px solid #3a3a42;
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.dark-mode .admin-inbox-page .reply-input {
+  background: #111111;
+  border-color: #3a3a42;
+  color: var(--ink);
+}
+
+.dark-mode .admin-inbox-page .reply-input::placeholder {
+  color: var(--muted);
+}
+
+.dark-mode .admin-inbox-page .reply-input:focus {
+  background: #111111;
+  border-color: #f5f5f7;
+}
+
+.dark-mode .admin-inbox-page .reply-btn {
+  background: #f5f5f7;
+  color: #111111;
 }
 </style>

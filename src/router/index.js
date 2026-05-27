@@ -16,6 +16,8 @@ import NotFoundView from '../views/NotFoundView.vue';
 const routes = [
   { path: '/', name: 'home', component: HomeView },
   { path: '/products', name: 'products', component: ProductsView },
+  { path: '/products/create', name: 'product-create', component: ProductFormView, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/products/edit/:id', name: 'product-edit-legacy', component: ProductFormView, meta: { requiresAuth: true, requiresAdmin: true }, props: true },
   { path: '/products/:id', name: 'product-detail', component: ProductDetailView, props: true },
   { path: '/cart', name: 'cart', component: CartView },
   { path: '/login', name: 'login', component: LoginView },
@@ -39,9 +41,10 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  const user = JSON.parse(localStorage.getItem('novatech-user') || 'null');
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('novatech-user') || 'null');
 
-  if (to.meta.requiresAuth && !user) {
+  if (to.meta.requiresAuth && (!token || !user)) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
 
