@@ -38,7 +38,7 @@ const formPhone = ref('');
 const formMessage = ref('');
 const formError = ref('');
 
-// Chat state — type: 'bot' | 'user' | 'admin'
+// Chat state - type: 'bot' | 'user' | 'admin'
 const messages = ref([]);
 const isTyping = ref(false);
 const messagesEl = ref(null);
@@ -58,7 +58,7 @@ function now() {
   return new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
 }
 
-// ── Conversation helpers ────────────────────────────────────────────────────
+// Conversation helpers
 async function createConversation() {
   const conv = await api.createChatConversation({
     customerName: formName.value.trim(),
@@ -72,7 +72,7 @@ function appendToConversation(sender, text) {
   api.addChatMessage(conversationId.value, { sender, text, time: now() }).catch(() => {});
 }
 
-// ── Polling for admin replies ───────────────────────────────────────────────
+// Polling for admin replies 
 function startPolling() {
   stopPolling();
   pollTimer = setInterval(async () => {
@@ -97,7 +97,7 @@ function stopPolling() {
 
 onUnmounted(stopPolling);
 
-// ── Message helpers ─────────────────────────────────────────────────────────
+// Message helpers
 function pushMessage(type, text) {
   messages.value.push({ type, text, time: now() });
   if (type !== 'admin') {
@@ -118,7 +118,7 @@ function scrollToBottom() {
   if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight;
 }
 
-// ── localStorage persistence ────────────────────────────────────────────────
+// localStorage persistence
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     phase: phase.value,
@@ -148,7 +148,7 @@ function loadState() {
 
 loadState();
 
-// ── Actions ─────────────────────────────────────────────────────────────────
+// Actions
 function toggleChat() {
   isOpen.value = !isOpen.value;
   if (isOpen.value) nextTick(scrollToBottom);
