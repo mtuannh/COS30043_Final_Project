@@ -1,4 +1,58 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+function isMercuryHost() {
+  return typeof window !== 'undefined' && /mercury\.swin\.edu\.au/i.test(window.location.hostname);
+}
+
+function usePhpApiGateway() {
+  if (import.meta.env.VITE_API_URL) {
+    return false;
+  }
+
+  if (isMercuryHost()) {
+    return true;
+  }
+
+  return import.meta.env.PROD;
+}
+
+function mercuryApiPhpUrl() {
+  let path = window.location.pathname;
+  if (path.indexOf('index.html') !== -1) {
+    path = path.replace(/index\.html.*$/, '');
+  }
+  if (path.charAt(path.length - 1) !== '/') {
+    path += '/';
+  }
+  return `${window.location.origin}${path}api.php`;
+}
+
+function buildRequestUrl(path) {
+  const [pathname, search = ''] = path.split('?');
+  const route = `/api${pathname}`;
+
+  if (import.meta.env.DEV && !usePhpApiGateway()) {
+    return `/api${path}`;
+  }
+
+  if (usePhpApiGateway()) {
+    const url = new URL(mercuryApiPhpUrl());
+    url.searchParams.set('route', route);
+
+    const extra = new URLSearchParams(search);
+    extra.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
+
+    return url.toString();
+  }
+
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}${path}`;
+  }
+
+  const base = import.meta.env.BASE_URL || '/';
+  const prefix = `${base}${base.endsWith('/') ? '' : '/'}api`.replace(/\/{2,}/g, '/');
+  return `${prefix}${path}`;
+}
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('token');
@@ -11,20 +65,32 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const requestUrl = buildRequestUrl(path);
+
+  const response = await fetch(requestUrl, {
     ...options,
     headers
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    if (response.status === 404) {
-      throw new Error('API route not found. Restart the backend with `npm run api` or `npm run start`.');
+  const raw = await response.text();
+  let payload = {};
+
+  if (raw) {
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      const snippet = raw.replace(/\s+/g, ' ').slice(0, 120);
+      throw new Error(
+        `API error (${response.status}) at ${requestUrl}. Upload api.php + api/ folder. ${snippet}`
+      );
     }
-    throw new Error(error.message || `Request failed (${response.status})`);
   }
 
-  return response.json();
+  if (!response.ok) {
+    throw new Error(payload.message || `Request failed (${response.status}) at ${requestUrl}`);
+  }
+
+  return payload;
 }
 
 export const api = {

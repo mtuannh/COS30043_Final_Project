@@ -129,12 +129,12 @@ async function submitEmail() {
   isSending.value = true;
 
   try {
-    await api.claimDiscount({
+    const result = await api.claimDiscount({
       spinId: spinId.value,
       email: email.value.trim()
     });
 
-    successMessage.value = 'Your discount code has been sent to your email.';
+    successMessage.value = result.message || 'Your discount code has been sent to your email.';
     showEmailModal.value = false;
     email.value = '';
   } catch (error) {

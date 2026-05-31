@@ -30,7 +30,6 @@ async function submit() {
 <template>
   <section class="container auth-layout py-5">
     <div class="auth-card">
-      <p class="eyebrow">Admin access</p>
       <h1 class="h2 fw-bold">Admin log in.</h1>
       <p class="text-secondary">Demo admin: admin@novatech.test / Password123</p>
       <p v-if="error" class="alert alert-danger">{{ error }}</p>

@@ -1,5 +1,7 @@
 node_modules/
 dist/
 .env
+.env.production
+dist/api/config.php
 .DS_Store
 npm-debug.log*

@@ -1,0 +1,192 @@
+{
+  "users": [
+    {
+      "id": "admin-demo",
+      "name": "Demo Admin",
+      "email": "admin@novatech.test",
+      "password": "$2b$10$/rH06HNNIRCbd46cN.EyZ.cugmEL9tLG02Gnbx./u.HHlvK/K5YC6",
+      "role": "admin"
+    }
+  ],
+  "products": [
+    {
+      "id": "iphone-mini",
+      "name": "iPhone Mini Air",
+      "category": "iPhone",
+      "price": 999,
+      "summary": "Compact, lightweight, and powerful for students on the move.",
+      "description": "A smaller phone for people who want premium performance, strong battery life, and a pocket-friendly design.",
+      "features": [
+        "Compact aluminium design",
+        "Dual camera system",
+        "Face unlock",
+        "Water resistant build"
+      ],
+      "likes": 51,
+      "gradient": "linear-gradient(135deg, #fbc2eb, #a6c1ee)"
+    },
+    {
+      "id": "ipad-studio",
+      "name": "iPad Studio",
+      "category": "iPad",
+      "price": 1299,
+      "summary": "A creative canvas for design, notes, entertainment, and productivity.",
+      "description": "iPad Studio supports multitasking, sketching, and content creation with a large laminated display and powerful processor.",
+      "features": [
+        "12.9-inch edge-to-edge display",
+        "Stylus support",
+        "Desktop-class browser",
+        "Magic keyboard compatible"
+      ],
+      "likes": 42,
+      "gradient": "linear-gradient(135deg, #cfd9df, #e2ebf0)"
+    },
+    {
+      "id": "ipad-learn",
+      "name": "iPad Learn",
+      "category": "iPad",
+      "price": 699,
+      "summary": "A student-friendly tablet for classes, reading, and media.",
+      "description": "iPad Learn focuses on affordability, portability, and long battery life for study and entertainment.",
+      "features": [
+        "10.9-inch display",
+        "Note-taking ready",
+        "Front landscape camera",
+        "10-hour battery"
+      ],
+      "likes": 18,
+      "gradient": "linear-gradient(135deg, #ffecd2, #fcb69f)"
+    },
+    {
+      "id": "macbook-proxima",
+      "name": "MacBook Proxima",
+      "category": "Mac",
+      "price": 2699,
+      "summary": "A high-performance laptop for developers, designers, and editors.",
+      "description": "MacBook Proxima is designed for demanding creative and technical work with a fast chip, vivid display, and quiet thermal system.",
+      "features": [
+        "14-inch liquid-style display",
+        "18-hour battery",
+        "Backlit keyboard",
+        "Multiple Thunderbolt ports"
+      ],
+      "likes": 50,
+      "gradient": "linear-gradient(135deg, #e6e9f0, #eef1f5)"
+    },
+    {
+      "id": "macbook-airlite",
+      "name": "MacBook Airlite",
+      "category": "Mac",
+      "price": 1599,
+      "summary": "Thin, fanless, and fast enough for everyday study and work.",
+      "description": "MacBook Airlite delivers a refined laptop experience with a slim design, instant wake, and excellent battery life.",
+      "features": [
+        "13-inch retina-style display",
+        "Fanless design",
+        "Lightweight chassis",
+        "1080p camera"
+      ],
+      "likes": 29,
+      "gradient": "linear-gradient(135deg, #f5f7fa, #c3cfe2)"
+    },
+    {
+      "id": "watch-pulse",
+      "name": "Watch Pulse",
+      "category": "Watch",
+      "price": 649,
+      "summary": "A wellness companion with fitness tracking and notifications.",
+      "description": "Watch Pulse helps users monitor workouts, stay connected, and build healthier habits through simple daily insights.",
+      "features": [
+        "Heart-rate tracking",
+        "Sleep insights",
+        "Workout modes",
+        "Swim-ready design"
+      ],
+      "likes": 25,
+      "gradient": "linear-gradient(135deg, #a1c4fd, #c2e9fb)"
+    },
+    {
+      "id": "airpods-orbit",
+      "name": "AirPods Orbit",
+      "category": "Audio",
+      "price": 399,
+      "summary": "Wireless earbuds with immersive sound and active noise control.",
+      "description": "AirPods Orbit provide rich audio, clear calls, and adaptive noise control in a pocketable charging case.",
+      "features": [
+        "Active noise control",
+        "Spatial audio",
+        "Sweat resistance",
+        "Wireless charging case"
+      ],
+      "likes": 37,
+      "gradient": "linear-gradient(135deg, #ffffff, #d7dde8)"
+    },
+    {
+      "id": "homepod-wave",
+      "name": "HomePod Wave",
+      "category": "Audio",
+      "price": 479,
+      "summary": "A room-filling smart speaker for music, calls, and home controls.",
+      "description": "HomePod Wave adapts audio to the room and provides voice controls for a connected home experience.",
+      "features": [
+        "Room-aware audio",
+        "Voice assistant",
+        "Stereo pair support",
+        "Smart home hub"
+      ],
+      "likes": 16,
+      "gradient": "linear-gradient(135deg, #667eea, #764ba2)"
+    },
+    {
+      "id": "magcase",
+      "name": "MagCase Clear",
+      "category": "Accessories",
+      "price": 79,
+      "summary": "A protective clear case with magnetic accessory support.",
+      "description": "MagCase Clear protects the phone while preserving the original finish and supporting magnetic chargers.",
+      "features": [
+        "Anti-yellowing material",
+        "Drop protection",
+        "Magnetic charging support",
+        "Raised camera edge"
+      ],
+      "likes": 11,
+      "gradient": "linear-gradient(135deg, #fdfbfb, #ebedee)"
+    },
+    {
+      "id": "keyboard-flow",
+      "name": "Keyboard Flow",
+      "category": "Accessories",
+      "price": 249,
+      "summary": "A low-profile wireless keyboard for tablets and desktops.",
+      "description": "Keyboard Flow offers comfortable typing, long battery life, and quick switching between devices.",
+      "features": [
+        "Slim aluminium body",
+        "Multi-device pairing",
+        "Rechargeable battery",
+        "Quiet keys"
+      ],
+      "likes": 14,
+      "gradient": "linear-gradient(135deg, #434343, #000000)"
+    },
+    {
+      "id": "charger-duo",
+      "name": "Charger Duo",
+      "category": "Accessories",
+      "price": 129,
+      "summary": "A compact dual-device charger for desk and travel setups.",
+      "description": "Charger Duo powers a phone and earbuds or watch together with a tidy foldable design.",
+      "features": [
+        "Two-device charging",
+        "Foldable stand",
+        "USB-C input",
+        "Travel-ready design"
+      ],
+      "likes": 20,
+      "gradient": "linear-gradient(135deg, #e0eafc, #cfdef3)"
+    }
+  ],
+  "messages": [],
+  "chat": [],
+  "discountSpins": []
+}

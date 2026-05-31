@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import ProductsView from '../views/ProductsView.vue';
 import ProductDetailView from '../views/ProductDetailView.vue';
@@ -57,8 +57,10 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView }
 ];
 
+const history = import.meta.env.PROD ? createWebHashHistory() : createWebHistory(import.meta.env.BASE_URL);
+
 const router = createRouter({
-  history: createWebHistory(),
+  history,
   routes,
   scrollBehavior() {
     return { top: 0 };
@@ -66,6 +68,10 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  if (import.meta.env.PROD && to.name === 'not-found' && (!window.location.hash || window.location.hash === '#')) {
+    return { name: 'home', replace: true };
+  }
+
   const { token, user } = getAuthSession();
   const isAuthenticated = Boolean(token && user);
 

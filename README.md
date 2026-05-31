@@ -1,46 +1,65 @@
 # NovaTech Store
 
-NovaTech Store is an Apple-inspired ecommerce web application for COS30043 Interface Design and Development. It uses Vue 3, Vite, Vue Router, Bootstrap, and a small Express REST API backed by `server/db.json`.
 
-## Run Locally
+
+Vue 3 + Vite storefront with Express/MongoDB for local dev, and a bundled PHP API for **Mercury** deploy.
+
+
+
+## Local development
+
+
 
 ```bash
+
 npm install
-```
 
-```
-frontend
 npm run dev
-```
 
-```backend
-npm run api
-or 
-npm run start
 ```
 
 
-The frontend runs on `http://localhost:5173` and the API runs on `http://localhost:3001/api`.
 
-Demo admin account:
+Open `http://localhost:5173` — API at `http://localhost:3001/api`.
 
-- Email: `admin@novatech.test`
-- Password: `Password123`
 
-## Requirement Mapping
 
-- Vue 3 with Vite: implemented in `src/main.js` and `vite.config.js`.
-- Bootstrap grid and responsive design: Bootstrap is imported globally and used throughout all views.
-- 10+ interconnected pages: home, products, product detail, cart, login, register, profile, admin, create/edit product, about, contact, and not found.
-- Collection display and detail pages: products list and product detail routes.
-- Search, sort, and pagination: catalogue filters in `ProductsView.vue`.
-- Registration and login: auth endpoints and guarded profile/admin routes.
-- Different visibility for authenticated users: profile/admin links and route guards require login.
-- CRUD: create, edit, delete products in the admin area through the REST API.
-- Social interaction: users can like products, and likes persist in the database.
-- Persistent data: product, user, like, and contact data are stored in `server/db.json`; cart and session are stored in local storage.
-- Form validation: login, registration, product editor, and contact forms validate user input.
+Copy `.env.example` → `.env` and fill in MongoDB + SMTP (same file is used when you build for Mercury).
 
-## Suggested Advanced Feature
 
-For the final submission, add a product comparison assistant with saved comparison boards. This would be a meaningful Vue-focused advanced feature because it can demonstrate reusable components, computed comparison data, local/API persistence, and a strong usability improvement.
+
+Demo admin: `admin@novatech.test` / `Password123`
+
+
+
+## Deploy to Mercury (3 steps)
+
+
+
+1. **`npm run build`** in your IDE (uses `.env` to embed API config into `dist/api/config.php`).
+
+2. Upload **everything inside `dist/`** to Mercury `htdocs` (WinSCP).
+
+3. Open your Mercury URL — it should end with `#/` (e.g. `.../project/#/`). If you only see a 404 page, add `#/` to the URL or rebuild and re-upload.
+
+
+
+No Composer, Render, or extra config files on the server.
+
+
+
+Production URLs use hash routing (`#/products`). The API uses `api.php` next to `index.html`.
+
+**Test after upload:** `https://mercury.swin.edu.au/<your-path>/api.php?route=/api/ping` → should show `"ok":true` and `"mongodb":true`.
+
+Mercury needs **PHP 7.4+** with the **MongoDB extension** (ask Feenix if the ping test fails).
+
+
+
+## Requirement mapping
+
+
+
+See course brief — Vue 3, Bootstrap, 10+ pages, auth, CRUD, likes, chat, discount wheel, MongoDB persistence.
+
+

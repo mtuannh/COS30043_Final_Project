@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "concurrently -k -n api,web \"npm run api\" \"wait-on -t 30000 http://localhost:3001/api/products && vite --host 0.0.0.0\"",
+    "dev:web": "vite --host 0.0.0.0",
     "api": "node server/server.js",
-    "start": "concurrently -k \"npm run api\" \"wait-on -t 30000 http://localhost:3001/api/products && npm run dev\"",
-    "build": "vite build",
+    "start": "npm run dev",
+    "build": "vite build && node scripts/package-mercury.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
