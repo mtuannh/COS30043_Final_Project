@@ -36,6 +36,7 @@ let users;
 let products;
 let messages;
 let discountSpins;
+let chat;
 
 const DISCOUNT_SEGMENTS = [
   { label: '5% OFF', percent: 5, weight: 30 },
@@ -55,6 +56,7 @@ async function connectDatabase() {
   products = db.collection('products');
   messages = db.collection('messages');
   discountSpins = db.collection('discountSpins');
+  chat = db.collection('chat');
   await seedIfEmpty();
   await migratePlainTextPasswords();
   await migrateCustomerRoles();
@@ -528,6 +530,98 @@ app.post('/api/discounts/claim', async (req, res) => {
     message: 'Discount code sent',
     discountLabel: spinRecord.discountLabel
   });
+});
+
+// Chat Conversations
+
+app.post('/api/chat', async (req, res) => {
+  const customerName = String(req.body.customerName || '').trim();
+  const customerPhone = String(req.body.customerPhone || '').trim();
+  if (!customerName || !customerPhone) {
+    res.status(400).json({ message: 'customerName and customerPhone are required' });
+    return;
+  }
+  const conversation = {
+    id: randomUUID(),
+    customerName,
+    customerPhone,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    messages: []
+  };
+  await chat.insertOne(conversation);
+  res.status(201).json(conversation);
+});
+
+app.post('/api/chat/:id/messages', async (req, res) => {
+  const { sender, text, time } = req.body;
+  if (!sender || !text) {
+    res.status(400).json({ message: 'sender and text are required' });
+    return;
+  }
+  const msg = {
+    sender,
+    text,
+    time: time || new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }),
+    timestamp: new Date().toISOString()
+  };
+  const result = await chat.findOneAndUpdate(
+    { id: req.params.id },
+    { $push: { messages: msg }, $set: { updatedAt: new Date().toISOString() } },
+    { returnDocument: 'after' }
+  );
+  if (!result) {
+    res.status(404).json({ message: 'Conversation not found' });
+    return;
+  }
+  res.json(result);
+});
+
+app.get('/api/chat/:id', async (req, res) => {
+  const conversation = await chat.findOne({ id: req.params.id });
+  if (!conversation) {
+    res.status(404).json({ message: 'Conversation not found' });
+    return;
+  }
+  res.json(conversation);
+});
+
+app.get('/api/chat', authenticateToken, requireAdmin, async (req, res) => {
+  const convs = await chat.find().sort({ updatedAt: -1 }).toArray();
+  res.json(convs);
+});
+
+app.delete('/api/chat/:id', authenticateToken, requireAdmin, async (req, res) => {
+  const result = await chat.deleteOne({ id: req.params.id });
+  if (result.deletedCount === 0) {
+    res.status(404).json({ message: 'Conversation not found' });
+    return;
+  }
+  res.json({ ok: true });
+});
+
+app.post('/api/chat/:id/reply', authenticateToken, requireAdmin, async (req, res) => {
+  const text = String(req.body.text || '').trim();
+  if (!text) {
+    res.status(400).json({ message: 'text is required' });
+    return;
+  }
+  const msg = {
+    sender: 'admin',
+    text,
+    time: new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }),
+    timestamp: new Date().toISOString()
+  };
+  const result = await chat.findOneAndUpdate(
+    { id: req.params.id },
+    { $push: { messages: msg }, $set: { updatedAt: new Date().toISOString() } },
+    { returnDocument: 'after' }
+  );
+  if (!result) {
+    res.status(404).json({ message: 'Conversation not found' });
+    return;
+  }
+  res.json(result);
 });
 
 async function start() {

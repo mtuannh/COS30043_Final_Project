@@ -87,5 +87,23 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+  },
+  createChatConversation(data) {
+    return request('/chat', { method: 'POST', body: JSON.stringify(data) });
+  },
+  addChatMessage(id, msg) {
+    return request(`/chat/${id}/messages`, { method: 'POST', body: JSON.stringify(msg) });
+  },
+  getChatConversation(id) {
+    return request(`/chat/${id}`);
+  },
+  getChatConversations() {
+    return request('/chat');
+  },
+  replyChatConversation(id, text) {
+    return request(`/chat/${id}/reply`, { method: 'POST', body: JSON.stringify({ text }) });
+  },
+  deleteChatConversation(id) {
+    return request(`/chat/${id}`, { method: 'DELETE' });
   }
 };
