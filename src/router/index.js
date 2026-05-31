@@ -13,6 +13,33 @@ import AboutView from '../views/AboutView.vue';
 import ContactView from '../views/ContactView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
 
+const AUTH_STORAGE_KEYS = ['user', 'novatech-user'];
+
+function parseStoredUser() {
+  for (const key of AUTH_STORAGE_KEYS) {
+    const storedUser = localStorage.getItem(key);
+
+    if (!storedUser) {
+      continue;
+    }
+
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      localStorage.removeItem(key);
+    }
+  }
+
+  return null;
+}
+
+function getAuthSession() {
+  return {
+    token: localStorage.getItem('token'),
+    user: parseStoredUser()
+  };
+}
+
 const routes = [
   { path: '/', name: 'home', component: HomeView },
   { path: '/products', name: 'products', component: ProductsView },
@@ -20,8 +47,8 @@ const routes = [
   { path: '/products/edit/:id', name: 'product-edit-legacy', component: ProductFormView, meta: { requiresAuth: true, requiresAdmin: true }, props: true },
   { path: '/products/:id', name: 'product-detail', component: ProductDetailView, props: true },
   { path: '/cart', name: 'cart', component: CartView },
-  { path: '/login', name: 'login', component: LoginView },
-  { path: '/register', name: 'register', component: RegisterView },
+  { path: '/login', name: 'login', component: LoginView, meta: { guestOnly: true } },
+  { path: '/register', name: 'register', component: RegisterView, meta: { guestOnly: true } },
   { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
   { path: '/admin', name: 'admin', component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/admin/inbox', name: 'admin-inbox', component: AdminInboxView, meta: { requiresAuth: true, requiresAdmin: true } },
@@ -41,10 +68,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('novatech-user') || 'null');
+  const { token, user } = getAuthSession();
+  const isAuthenticated = Boolean(token && user);
 
-  if (to.meta.requiresAuth && (!token || !user)) {
+  if (to.meta.guestOnly && isAuthenticated) {
+    return { name: user.role === 'admin' ? 'admin' : 'profile' };
+  }
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
 

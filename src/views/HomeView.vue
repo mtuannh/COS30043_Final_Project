@@ -2,7 +2,6 @@
 import { computed, inject, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DiscountWheel from '../components/DiscountWheel.vue';
-import ProductCard from '../components/ProductCard.vue';
 import { api } from '../services/api';
 
 const store = inject('store');
@@ -107,21 +106,6 @@ onMounted(async () => {
       </div>
     </section>
 
-    <section class="container py-5">
-      <div class="d-flex justify-content-between align-items-end mb-4">
-        <div>
-          <p class="eyebrow">Popular now</p>
-          <h2 class="h1">Loved by the community</h2>
-        </div>
-        <RouterLink class="link-dark" to="/products">Browse products</RouterLink>
-      </div>
-
-      <div class="row g-4">
-        <div v-for="product in featuredProducts" :key="product.id" class="col-12 col-md-6 col-xl-4">
-          <ProductCard :product="product" />
-        </div>
-      </div>
-    </section>
   </template>
 
   <DiscountWheel v-if="!isAdmin" />

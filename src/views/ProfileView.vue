@@ -1,9 +1,10 @@
 <script setup>
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 const store = inject('store');
 const router = useRouter();
+const tokenPreview = computed(() => (store.token ? `${store.token.slice(0, 16)}...` : 'No active token'));
 
 function logout() {
   store.logout();
@@ -45,6 +46,24 @@ function logout() {
               <RouterLink class="btn btn-outline-dark rounded-pill" to="/admin/products/new">Create product</RouterLink>
               <RouterLink class="btn btn-outline-dark rounded-pill" to="/admin/inbox">View inbox</RouterLink>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card mt-4">
+        <p class="eyebrow mb-3">Advanced Vue authentication</p>
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <span class="d-block fw-semibold">JWT session</span>
+            <span class="text-secondary small">{{ tokenPreview }}</span>
+          </div>
+          <div class="col-12 col-md-4">
+            <span class="d-block fw-semibold">Vue Router guard</span>
+            <span class="text-secondary small">This profile page requires a logged-in user.</span>
+          </div>
+          <div class="col-12 col-md-4">
+            <span class="d-block fw-semibold">Authenticated API</span>
+            <span class="text-secondary small">Admin requests include the Bearer token.</span>
           </div>
         </div>
       </div>
