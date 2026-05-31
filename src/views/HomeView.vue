@@ -26,7 +26,6 @@ onMounted(async () => {
       <div class="container">
         <div>
           <div>
-            <p class="eyebrow">Admin dashboard</p>
             <h1 class="display-4 fw-bold">Welcome back, {{ store.user.name }}.</h1>
             <p class="lead hero-copy">
               Manage the catalogue, review customer messages, and keep the NovaTech storefront up to date.
@@ -59,12 +58,8 @@ onMounted(async () => {
       </div>
 
       <div class="admin-card rounded-4 border p-4">
-        <div class="d-flex justify-content-between align-items-end mb-3">
-          <div>
-            <p class="eyebrow">Catalogue insight</p>
-            <h2 class="h3 fw-bold mb-0">Top liked products</h2>
-          </div>
-          <RouterLink class="link-dark" to="/admin">Edit products</RouterLink>
+        <div class="mb-3">
+          <h2 class="h3 fw-bold mb-0">Top liked products</h2>
         </div>
 
         <div class="admin-table table-responsive">

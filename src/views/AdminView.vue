@@ -25,7 +25,6 @@ onMounted(loadProducts);
   <section class="container py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
       <div>
-        <p class="eyebrow">Content management</p>
         <h1 class="display-5 fw-bold">Manage products.</h1>
       </div>
       <RouterLink class="btn btn-dark rounded-pill align-self-start" to="/admin/products/new">Create product</RouterLink>

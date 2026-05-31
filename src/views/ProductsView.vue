@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, inject, onMounted, reactive, ref, watch } from 'vue';
 import ProductCard from '../components/ProductCard.vue';
 import ProductFilters from '../components/ProductFilters.vue';
 import { api } from '../services/api';
 
+const store = inject('store');
 const products = ref([]);
 const total = ref(0);
 const currentPage = ref(1);
@@ -17,6 +18,7 @@ let filters = reactive({
 
 const categories = computed(() => ['iPhone', 'iPad', 'Mac', 'Watch', 'Audio', 'Accessories']);
 const pageCount = computed(() => Math.max(1, Math.ceil(total.value / filters.pageSize)));
+const isAdmin = computed(() => store.user?.role === 'admin');
 
 async function loadProducts() {
   loading.value = true;
@@ -45,9 +47,14 @@ onMounted(loadProducts);
 <template>
   <section class="container py-5">
     <div class="mb-4">
-      <p class="eyebrow">Catalogue</p>
-      <h1 class="display-5 fw-bold">Shop the full NovaTech range.</h1>
-      <p class="text-secondary">Search, filter, sort, and paginate through the product collection.</p>
+      <template v-if="isAdmin">
+        <h1 class="display-5 fw-bold">Browse the product catalogue.</h1>
+        <p class="text-secondary">Search, filter, and review the products currently listed in the NovaTech store.</p>
+      </template>
+      <template v-else>
+        <h1 class="display-5 fw-bold">Shop the full NovaTech range.</h1>
+        <p class="text-secondary">Search, filter, sort, and paginate through the product collection.</p>
+      </template>
     </div>
 
     <ProductFilters v-model="filters" :categories="categories" />

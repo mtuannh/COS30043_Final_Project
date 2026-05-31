@@ -79,7 +79,6 @@ onUnmounted(() => clearInterval(refreshTimer));
     <div class="container">
       <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-          <p class="eyebrow">Admin</p>
           <h1 class="display-5 fw-bold">Chat Inbox</h1>
         </div>
         <span class="badge bg-dark fs-6">{{ conversations.length }} conversation{{ conversations.length !== 1 ? 's' : '' }}</span>
