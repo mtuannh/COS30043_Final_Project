@@ -1,4 +1,11 @@
-import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
+import { createRouter } from 'vue-router';
+import {
+  createAppHistory,
+  ensureMercuryHashRoute,
+  routePathFromHash,
+  saveProjectBase,
+  shouldUseHashRouter
+} from './history';
 import HomeView from '../views/HomeView.vue';
 import ProductsView from '../views/ProductsView.vue';
 import ProductDetailView from '../views/ProductDetailView.vue';
@@ -57,19 +64,31 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView }
 ];
 
-const history = import.meta.env.PROD ? createWebHashHistory() : createWebHistory(import.meta.env.BASE_URL);
-
 const router = createRouter({
-  history,
+  history: createAppHistory(),
   routes,
   scrollBehavior() {
     return { top: 0 };
   }
 });
 
+router.afterEach(() => {
+  saveProjectBase();
+});
+
 router.beforeEach((to) => {
-  if (import.meta.env.PROD && to.name === 'not-found' && (!window.location.hash || window.location.hash === '#')) {
-    return { name: 'home', replace: true };
+  if (shouldUseHashRouter()) {
+    const hashPath = routePathFromHash();
+    if (to.name === 'not-found' && hashPath !== to.path) {
+      const resolved = router.resolve(hashPath);
+      if (resolved.name !== 'not-found') {
+        return hashPath;
+      }
+    }
+
+    if (to.name === 'not-found' && (hashPath === '/' || !window.location.hash || window.location.hash === '#')) {
+      return { name: 'home', replace: true };
+    }
   }
 
   const { token, user } = getAuthSession();

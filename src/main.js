@@ -4,6 +4,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles.css';
 import App from './App.vue';
 import router from './router';
+import { ensureMercuryHashRoute, saveProjectBase } from './router/history';
+
+ensureMercuryHashRoute();
+saveProjectBase();
 
 const savedUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('novatech-user') || 'null');
 const savedToken = localStorage.getItem('token') || '';
